@@ -172,8 +172,8 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         "n_jobs": int(cfg.n_jobs),
         "validation_size": int(len(valid_part)),
         "validation_ensemble": ensemble_metrics,
-        "submission_path": str(submission_path),
-        "metrics_path": str(metrics_path),
+        "submission_path": submission_path.as_posix(),
+        "metrics_path": metrics_path.as_posix(),
     }
     save_json(summary, cfg.output_dir / "run_summary.json")
 
