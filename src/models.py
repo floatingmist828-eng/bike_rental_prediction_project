@@ -25,13 +25,15 @@ class PredictionCalibrator:
     mode: CalibrationMode = "none"
     slope: float = 1.0
     intercept: float = 0.0
+    strength: float = 1.0
 
     def apply(self, pred: np.ndarray) -> np.ndarray:
         values = np.asarray(pred, dtype=float)
         if self.mode == "none":
             calibrated = values
         elif self.mode in {"scale", "affine"}:
-            calibrated = self.slope * values + self.intercept
+            full_correction = self.slope * values + self.intercept
+            calibrated = values + self.strength * (full_correction - values)
         else:
             raise ValueError(f"Unknown calibration mode: {self.mode}")
         calibrated = np.nan_to_num(calibrated, nan=0.0, posinf=0.0, neginf=0.0)
@@ -320,19 +322,26 @@ def fit_prediction_calibrator(
     pred_valid: np.ndarray,
     y_valid: np.ndarray,
     mode: CalibrationMode = "affine",
+    strength: float = 1.0,
 ) -> PredictionCalibrator:
     """Fit a simple validation-based correction for future-horizon bias."""
     pred = np.asarray(pred_valid, dtype=float)
     target = np.asarray(y_valid, dtype=float)
+    strength = float(np.clip(strength, 0.0, 1.0))
     if mode == "none":
-        return PredictionCalibrator(mode="none")
+        return PredictionCalibrator(mode="none", strength=0.0)
     if pred.shape != target.shape:
         raise ValueError("pred_valid and y_valid must have the same shape.")
 
     if mode == "scale":
         denom = float(np.dot(pred, pred))
         slope = 1.0 if denom <= 0.0 else float(np.dot(pred, target) / denom)
-        return PredictionCalibrator(mode=mode, slope=float(np.clip(slope, 0.85, 1.25)), intercept=0.0)
+        return PredictionCalibrator(
+            mode=mode,
+            slope=float(np.clip(slope, 0.85, 1.25)),
+            intercept=0.0,
+            strength=strength,
+        )
 
     if mode == "affine":
         design = np.vstack([pred, np.ones_like(pred)]).T
@@ -341,6 +350,7 @@ def fit_prediction_calibrator(
             mode=mode,
             slope=float(np.clip(slope, 0.85, 1.25)),
             intercept=float(np.clip(intercept, -30.0, 30.0)),
+            strength=strength,
         )
 
     raise ValueError(f"Unknown calibration mode: {mode}")

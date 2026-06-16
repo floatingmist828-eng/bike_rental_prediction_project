@@ -23,6 +23,7 @@ class ExperimentConfig:
     save_model: bool = True
     validation_size: int | None = None
     calibration: CalibrationMode = "affine"
+    calibration_strength: float = 0.4
 
 
 TARGET_COL = "cnt"

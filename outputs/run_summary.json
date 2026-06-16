@@ -14,12 +14,13 @@
   "calibration": {
     "mode": "affine",
     "slope": 1.072121323316958,
-    "intercept": 1.942269568434741
+    "intercept": 1.942269568434741,
+    "strength": 0.4
   },
   "validation_calibrated": {
-    "mse": 3027.0260384050835,
-    "rmse": 55.01841544796691,
-    "mae": 34.377971846184494
+    "mse": 3235.780876434706,
+    "rmse": 56.88392458713363,
+    "mae": 36.02017314721831
   },
   "submission_path": "outputs/submission.csv",
   "metrics_path": "outputs/validation_metrics.csv"

@@ -95,7 +95,12 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     weights = optimize_ensemble_weights(validation_predictions, y_valid, cfg.seed)
     pred_valid_ensemble = weighted_average_predictions(validation_predictions, weights)
     ensemble_metrics = regression_metrics(y_valid, pred_valid_ensemble)
-    calibrator = fit_prediction_calibrator(pred_valid_ensemble, y_valid, cfg.calibration)
+    calibrator = fit_prediction_calibrator(
+        pred_valid_ensemble,
+        y_valid,
+        cfg.calibration,
+        cfg.calibration_strength,
+    )
     pred_valid_calibrated = calibrator.apply(pred_valid_ensemble)
     calibrated_metrics = regression_metrics(y_valid, pred_valid_calibrated)
     metric_rows.append(
@@ -122,7 +127,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     )
     print(
         f"Calibration mode={calibrator.mode} | slope={calibrator.slope:.6f} | "
-        f"intercept={calibrator.intercept:.6f}"
+        f"intercept={calibrator.intercept:.6f} | strength={calibrator.strength:.3f}"
     )
     print(
         f"Validation calibrated MSE={calibrated_metrics['mse']:.6f} | "
@@ -137,6 +142,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
             "mode": calibrator.mode,
             "slope": calibrator.slope,
             "intercept": calibrator.intercept,
+            "strength": calibrator.strength,
         },
         cfg.output_dir / "calibration.json",
     )
@@ -203,6 +209,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
             "mode": calibrator.mode,
             "slope": calibrator.slope,
             "intercept": calibrator.intercept,
+            "strength": calibrator.strength,
         },
         "validation_calibrated": calibrated_metrics,
         "submission_path": submission_path.as_posix(),
@@ -228,6 +235,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--n-jobs", type=int, default=1, help="Use 1 for the most reproducible run")
     parser.add_argument("--validation-size", type=int, default=None, help="Number of latest train rows used as validation")
     parser.add_argument("--calibration", choices=["none", "scale", "affine"], default="affine")
+    parser.add_argument(
+        "--calibration-strength",
+        type=float,
+        default=0.4,
+        help="Shrink validation-fitted calibration toward raw predictions; 0 disables it, 1 applies it fully",
+    )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
     return parser.parse_args()
 
@@ -246,5 +259,6 @@ def main() -> None:
         save_model=not args.no_save_model,
         validation_size=args.validation_size,
         calibration=args.calibration,
+        calibration_strength=args.calibration_strength,
     )
     run_experiment(cfg)
