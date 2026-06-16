@@ -1,6 +1,6 @@
 {
-  "lgbm_log_horizon_a": 0.5633856304777164,
-  "lgbm_log_horizon_b": 0.4366143692852908,
-  "xgb_raw_horizon": 0.0,
-  "xgb_log": 2.369929082496549e-10
+  "lgbm_log_horizon_a": 0.5633846522792546,
+  "lgbm_log_horizon_b": 0.43661533755912774,
+  "xgb_raw_horizon": 1.0161617778986763e-08,
+  "xgb_log": 0.0
 }

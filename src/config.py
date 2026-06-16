@@ -7,6 +7,7 @@ from typing import Literal
 
 FeatureMode = Literal["base", "advanced"]
 ModelSet = Literal["default", "quick", "sklearn"]
+CalibrationMode = Literal["none", "scale", "affine"]
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,7 @@ class ExperimentConfig:
     n_jobs: int = 1
     save_model: bool = True
     validation_size: int | None = None
+    calibration: CalibrationMode = "affine"
 
 
 TARGET_COL = "cnt"

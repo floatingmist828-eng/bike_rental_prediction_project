@@ -11,6 +11,7 @@ import pandas as pd
 from .config import ExperimentConfig, TARGET_COL
 from .features import make_features, make_sample_weight
 from .models import (
+    fit_prediction_calibrator,
     fit_model,
     make_model_specs,
     optimize_ensemble_weights,
@@ -94,11 +95,21 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     weights = optimize_ensemble_weights(validation_predictions, y_valid, cfg.seed)
     pred_valid_ensemble = weighted_average_predictions(validation_predictions, weights)
     ensemble_metrics = regression_metrics(y_valid, pred_valid_ensemble)
+    calibrator = fit_prediction_calibrator(pred_valid_ensemble, y_valid, cfg.calibration)
+    pred_valid_calibrated = calibrator.apply(pred_valid_ensemble)
+    calibrated_metrics = regression_metrics(y_valid, pred_valid_calibrated)
     metric_rows.append(
         {
             "model": "ensemble",
             "target_transform": "weighted_average",
             **ensemble_metrics,
+        }
+    )
+    metric_rows.append(
+        {
+            "model": "ensemble_calibrated",
+            "target_transform": calibrator.mode,
+            **calibrated_metrics,
         }
     )
 
@@ -109,10 +120,26 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         f"Validation ensemble MSE={ensemble_metrics['mse']:.6f} | "
         f"RMSE={ensemble_metrics['rmse']:.6f} | MAE={ensemble_metrics['mae']:.6f}"
     )
+    print(
+        f"Calibration mode={calibrator.mode} | slope={calibrator.slope:.6f} | "
+        f"intercept={calibrator.intercept:.6f}"
+    )
+    print(
+        f"Validation calibrated MSE={calibrated_metrics['mse']:.6f} | "
+        f"RMSE={calibrated_metrics['rmse']:.6f} | MAE={calibrated_metrics['mae']:.6f}"
+    )
 
     metrics_path = cfg.output_dir / "validation_metrics.csv"
     pd.DataFrame(metric_rows).to_csv(metrics_path, index=False)
     save_json(weights, cfg.output_dir / "ensemble_weights.json")
+    save_json(
+        {
+            "mode": calibrator.mode,
+            "slope": calibrator.slope,
+            "intercept": calibrator.intercept,
+        },
+        cfg.output_dir / "calibration.json",
+    )
     save_json(feature_columns, cfg.output_dir / "feature_columns.json")
 
     # Final stage: train on the full train.csv and predict test.csv.
@@ -155,7 +182,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     if not final_predictions:
         raise RuntimeError("No final predictions were generated.")
 
-    pred_test = weighted_average_predictions(final_predictions, weights)
+    pred_test = calibrator.apply(weighted_average_predictions(final_predictions, weights))
     submission = build_submission(test_df, pred_test)
     validate_submission(submission, test_df)
 
@@ -172,6 +199,12 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         "n_jobs": int(cfg.n_jobs),
         "validation_size": int(len(valid_part)),
         "validation_ensemble": ensemble_metrics,
+        "calibration": {
+            "mode": calibrator.mode,
+            "slope": calibrator.slope,
+            "intercept": calibrator.intercept,
+        },
+        "validation_calibrated": calibrated_metrics,
         "submission_path": submission_path.as_posix(),
         "metrics_path": metrics_path.as_posix(),
     }
@@ -194,6 +227,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--n-jobs", type=int, default=1, help="Use 1 for the most reproducible run")
     parser.add_argument("--validation-size", type=int, default=None, help="Number of latest train rows used as validation")
+    parser.add_argument("--calibration", choices=["none", "scale", "affine"], default="affine")
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
     return parser.parse_args()
 
@@ -211,5 +245,6 @@ def main() -> None:
         n_jobs=args.n_jobs,
         save_model=not args.no_save_model,
         validation_size=args.validation_size,
+        calibration=args.calibration,
     )
     run_experiment(cfg)

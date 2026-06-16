@@ -7,9 +7,19 @@
   "n_jobs": 1,
   "validation_size": 3476,
   "validation_ensemble": {
-    "mse": 3606.9005864630544,
-    "rmse": 60.05747735680424,
-    "mae": 38.76519026311922
+    "mse": 3606.9005884873764,
+    "rmse": 60.05747737365745,
+    "mae": 38.765189884672516
+  },
+  "calibration": {
+    "mode": "affine",
+    "slope": 1.072121323316958,
+    "intercept": 1.942269568434741
+  },
+  "validation_calibrated": {
+    "mse": 3027.0260384050835,
+    "rmse": 55.01841544796691,
+    "mae": 34.377971846184494
   },
   "submission_path": "outputs/submission.csv",
   "metrics_path": "outputs/validation_metrics.csv"
