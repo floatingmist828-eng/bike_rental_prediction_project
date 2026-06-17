@@ -92,13 +92,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     if not validation_predictions:
         raise RuntimeError("All models failed during validation.")
 
-    weights = optimize_ensemble_weights(
-        validation_predictions,
-        y_valid,
-        cfg.seed,
-        cfg.calibration,
-        cfg.calibration_strength,
-    )
+    weights = optimize_ensemble_weights(validation_predictions, y_valid, cfg.seed)
     pred_valid_ensemble = weighted_average_predictions(validation_predictions, weights)
     ensemble_metrics = regression_metrics(y_valid, pred_valid_ensemble)
     calibrator = fit_prediction_calibrator(
@@ -244,7 +238,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--calibration-strength",
         type=float,
-        default=1.0,
+        default=0.6,
         help="Shrink validation-fitted calibration toward raw predictions; 0 disables it, 1 applies it fully",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
