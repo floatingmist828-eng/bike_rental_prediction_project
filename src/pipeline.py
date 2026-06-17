@@ -238,7 +238,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--calibration-strength",
         type=float,
-        default=0.4,
+        default=0.6,
         help="Shrink validation-fitted calibration toward raw predictions; 0 disables it, 1 applies it fully",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
