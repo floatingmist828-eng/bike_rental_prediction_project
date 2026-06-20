@@ -16,6 +16,7 @@ class CandidateRecipeTests(unittest.TestCase):
         self.assertIn("raw_count_0p80000", names)
         self.assertIn("raw_count_0p90000", names)
         self.assertIn("raw_count_1p00000", names)
+        self.assertIn("raw_count_1p02500", names)
         self.assertEqual(names.count("raw_count_0p45000"), 1)
 
 
