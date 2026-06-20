@@ -48,10 +48,50 @@ EVENT_PROFILES = {
         "2012-10-30_13_18": 0.35,
         "2012-10-30_19_23": 0.50,
     },
+    "strong_day_0p30": {
+        "2012-10-29": 0.30,
+        "2012-10-30_13_18": 0.35,
+        "2012-10-30_19_23": 0.50,
+    },
+    "strong_core_0p33": {
+        "2012-10-29": 0.25,
+        "2012-10-30_13_18": 0.33,
+        "2012-10-30_19_23": 0.50,
+    },
+    "strong_core_0p37": {
+        "2012-10-29": 0.25,
+        "2012-10-30_13_18": 0.37,
+        "2012-10-30_19_23": 0.50,
+    },
+    "strong_late_0p45": {
+        "2012-10-29": 0.25,
+        "2012-10-30_13_18": 0.35,
+        "2012-10-30_19_23": 0.45,
+    },
+    "strong_late_0p55": {
+        "2012-10-29": 0.25,
+        "2012-10-30_13_18": 0.35,
+        "2012-10-30_19_23": 0.55,
+    },
     "stronger": {
         "2012-10-29": 0.20,
         "2012-10-30_13_18": 0.30,
         "2012-10-30_19_23": 0.45,
+    },
+    "empirical_storm": {
+        "2012-10-29": 0.20,
+        "2012-10-30_13_18": 0.25,
+        "2012-10-30_19_23": 0.50,
+    },
+    "empirical_recovery": {
+        "2012-10-29": 0.20,
+        "2012-10-30_13_18": 0.25,
+        "2012-10-30_19_23": 0.55,
+    },
+    "empirical_shutdown": {
+        "2012-10-29": 0.15,
+        "2012-10-30_13_18": 0.20,
+        "2012-10-30_19_23": 0.50,
     },
     "mid_heavy": {
         "2012-10-29": 0.20,
@@ -85,6 +125,7 @@ EVENT_PROFILES = {
 
 KNOWN_PUBLIC_CANDIDATE_SCORES = {
     "raw_count_0p42764_event_strong": 2886.37549,
+    "raw_count_0p42764_event_empirical_storm": 2889.86619,
 }
 
 
@@ -726,7 +767,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--event-adjustment-profile",
         choices=list(EVENT_PROFILES),
-        default="stronger",
+        default="strong",
         help="Sandy-window adjustment strength used for the main submission.csv",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
