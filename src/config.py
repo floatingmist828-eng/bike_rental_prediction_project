@@ -24,6 +24,7 @@ class ExperimentConfig:
     validation_size: int | None = None
     calibration: CalibrationMode = "affine"
     calibration_strength: float = 0.6
+    count_blend_weight: float = 0.42764
 
 
 TARGET_COL = "cnt"

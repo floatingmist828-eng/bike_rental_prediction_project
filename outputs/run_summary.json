@@ -7,20 +7,40 @@
   "n_jobs": 1,
   "validation_size": 3476,
   "validation_ensemble": {
-    "mse": 3606.9005864630544,
-    "rmse": 60.05747735680424,
-    "mae": 38.76519026311922
+    "mse": 3606.900586420277,
+    "rmse": 60.0574773564481,
+    "mae": 38.76518989449045
   },
   "calibration": {
     "mode": "affine",
-    "slope": 1.0721213158884404,
-    "intercept": 1.9422706906211022,
+    "slope": 1.072121321884148,
+    "intercept": 1.9422698265387814,
     "strength": 0.6
   },
+  "count_blend": {
+    "weight": 0.42764,
+    "enabled": true,
+    "validation_count": {
+      "mse": 2762.293043742755,
+      "rmse": 52.5575212861371,
+      "mae": 33.15275867180953
+    },
+    "validation_blended": {
+      "mse": 3053.7203849737,
+      "rmse": 55.2604776035613,
+      "mae": 35.092813633171964
+    }
+  },
+  "event_adjustment": {
+    "enabled": true,
+    "method": "hurricane_sandy_window",
+    "changed_rows": 12,
+    "mean_delta": -0.24797844558096926
+  },
   "validation_calibrated": {
-    "mse": 3119.806017647629,
-    "rmse": 55.855223727487015,
-    "mae": 35.13067248814554
+    "mse": 3119.8059733322802,
+    "rmse": 55.85522333078868,
+    "mae": 35.13067184546486
   },
   "submission_path": "outputs/submission.csv",
   "metrics_path": "outputs/validation_metrics.csv"

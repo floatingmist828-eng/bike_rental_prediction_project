@@ -250,6 +250,225 @@ def make_model_specs(model_set: str, seed: int, n_jobs: int) -> list[ModelSpec]:
     return specs
 
 
+def make_count_model_specs(seed: int, n_jobs: int) -> list[ModelSpec]:
+    """Create a diverse count-objective branch for fixed small-weight blending."""
+    specs: list[ModelSpec] = []
+    n_jobs = int(n_jobs)
+
+    if _has_module("lightgbm"):
+        import lightgbm as lgb
+
+        specs.extend(
+            [
+                ModelSpec(
+                    "lgbm_tweedie_count_a",
+                    lgb.LGBMRegressor(
+                        objective="tweedie",
+                        n_estimators=1400,
+                        learning_rate=0.025,
+                        num_leaves=15,
+                        min_child_samples=5,
+                        subsample=0.80,
+                        subsample_freq=1,
+                        colsample_bytree=0.90,
+                        reg_alpha=0.05,
+                        reg_lambda=0.50,
+                        tweedie_variance_power=1.3,
+                        random_state=seed + 4980,
+                        n_jobs=n_jobs,
+                        verbose=-1,
+                    ),
+                    "raw",
+                ),
+                ModelSpec(
+                    "lgbm_poisson_count_a",
+                    lgb.LGBMRegressor(
+                        objective="poisson",
+                        n_estimators=600,
+                        learning_rate=0.080,
+                        num_leaves=23,
+                        min_child_samples=40,
+                        subsample=0.90,
+                        subsample_freq=1,
+                        colsample_bytree=0.90,
+                        reg_alpha=0.05,
+                        reg_lambda=0.50,
+                        random_state=seed + 4988,
+                        n_jobs=n_jobs,
+                        verbose=-1,
+                    ),
+                    "raw",
+                ),
+                ModelSpec(
+                    "lgbm_poisson_count_b",
+                    lgb.LGBMRegressor(
+                        objective="poisson",
+                        n_estimators=1200,
+                        learning_rate=0.035,
+                        num_leaves=23,
+                        min_child_samples=40,
+                        subsample=0.80,
+                        subsample_freq=1,
+                        colsample_bytree=0.90,
+                        reg_alpha=0.05,
+                        reg_lambda=0.50,
+                        random_state=seed + 4994,
+                        n_jobs=n_jobs,
+                        verbose=-1,
+                    ),
+                    "raw",
+                ),
+                ModelSpec(
+                    "lgbm_tweedie_count_b",
+                    lgb.LGBMRegressor(
+                        objective="tweedie",
+                        n_estimators=1400,
+                        learning_rate=0.025,
+                        num_leaves=15,
+                        min_child_samples=40,
+                        subsample=0.80,
+                        subsample_freq=1,
+                        colsample_bytree=0.90,
+                        reg_alpha=0.05,
+                        reg_lambda=1.00,
+                        tweedie_variance_power=1.3,
+                        random_state=seed + 5060,
+                        n_jobs=n_jobs,
+                        verbose=-1,
+                    ),
+                    "raw",
+                ),
+                ModelSpec(
+                    "lgbm_tweedie_count_c",
+                    lgb.LGBMRegressor(
+                        objective="tweedie",
+                        n_estimators=1400,
+                        learning_rate=0.025,
+                        num_leaves=15,
+                        min_child_samples=40,
+                        subsample=0.90,
+                        subsample_freq=1,
+                        colsample_bytree=0.90,
+                        reg_alpha=0.05,
+                        reg_lambda=2.00,
+                        tweedie_variance_power=1.5,
+                        random_state=seed + 5080,
+                        n_jobs=n_jobs,
+                        verbose=-1,
+                    ),
+                    "raw",
+                ),
+                ModelSpec(
+                    "lgbm_tweedie_count_d",
+                    lgb.LGBMRegressor(
+                        objective="tweedie",
+                        n_estimators=1200,
+                        learning_rate=0.035,
+                        num_leaves=15,
+                        min_child_samples=80,
+                        subsample=0.80,
+                        subsample_freq=1,
+                        colsample_bytree=0.90,
+                        reg_alpha=0.05,
+                        reg_lambda=2.00,
+                        tweedie_variance_power=1.3,
+                        random_state=seed + 5069,
+                        n_jobs=n_jobs,
+                        verbose=-1,
+                    ),
+                    "raw",
+                ),
+                ModelSpec(
+                    "lgbm_poisson_count_c",
+                    lgb.LGBMRegressor(
+                        objective="poisson",
+                        n_estimators=1000,
+                        learning_rate=0.045,
+                        num_leaves=15,
+                        min_child_samples=40,
+                        subsample=0.80,
+                        subsample_freq=1,
+                        colsample_bytree=0.90,
+                        reg_alpha=0.05,
+                        reg_lambda=2.00,
+                        random_state=seed + 5042,
+                        n_jobs=n_jobs,
+                        verbose=-1,
+                    ),
+                    "raw",
+                ),
+                ModelSpec(
+                    "lgbm_tweedie_count_e",
+                    lgb.LGBMRegressor(
+                        objective="tweedie",
+                        n_estimators=1000,
+                        learning_rate=0.045,
+                        num_leaves=23,
+                        min_child_samples=40,
+                        subsample=0.80,
+                        subsample_freq=1,
+                        colsample_bytree=0.90,
+                        reg_alpha=0.05,
+                        reg_lambda=2.00,
+                        tweedie_variance_power=1.1,
+                        random_state=seed + 4996,
+                        n_jobs=n_jobs,
+                        verbose=-1,
+                    ),
+                    "raw",
+                ),
+            ]
+        )
+
+    if _has_module("xgboost"):
+        from xgboost import XGBRegressor
+
+        specs.extend(
+            [
+                ModelSpec(
+                    "xgb_raw_horizon",
+                    XGBRegressor(
+                        objective="reg:squarederror",
+                        n_estimators=800,
+                        learning_rate=0.050,
+                        max_depth=4,
+                        min_child_weight=6.0,
+                        subsample=0.90,
+                        colsample_bytree=0.90,
+                        reg_lambda=2.0,
+                        reg_alpha=0.05,
+                        random_state=seed + 64,
+                        n_jobs=n_jobs,
+                        tree_method="hist",
+                        eval_metric="rmse",
+                    ),
+                    "raw",
+                ),
+                ModelSpec(
+                    "xgb_log",
+                    XGBRegressor(
+                        objective="reg:squarederror",
+                        n_estimators=350,
+                        learning_rate=0.050,
+                        max_depth=5,
+                        min_child_weight=2.0,
+                        subsample=0.90,
+                        colsample_bytree=0.90,
+                        reg_lambda=1.5,
+                        reg_alpha=0.02,
+                        random_state=seed + 4,
+                        n_jobs=n_jobs,
+                        tree_method="hist",
+                        eval_metric="rmse",
+                    ),
+                    "log1p",
+                ),
+            ]
+        )
+
+    return specs
+
+
 def fit_model(spec: ModelSpec, X: pd.DataFrame, y: np.ndarray, sample_weight: np.ndarray | None = None) -> object:
     y_fit = np.log1p(y) if spec.target_transform == "log1p" else y
     try:
@@ -267,7 +486,13 @@ def predict_model(spec: ModelSpec, X: pd.DataFrame) -> np.ndarray:
     return np.clip(pred, 0.0, None)
 
 
-def optimize_ensemble_weights(prediction_map: dict[str, np.ndarray], y_true: np.ndarray, seed: int) -> dict[str, float]:
+def optimize_ensemble_weights(
+    prediction_map: dict[str, np.ndarray],
+    y_true: np.ndarray,
+    seed: int,
+    calibration_mode: CalibrationMode = "none",
+    calibration_strength: float = 0.0,
+) -> dict[str, float]:
     names = list(prediction_map.keys())
     if not names:
         raise ValueError("No predictions supplied for ensemble weighting.")
@@ -280,25 +505,52 @@ def optimize_ensemble_weights(prediction_map: dict[str, np.ndarray], y_true: np.
         from scipy.optimize import minimize
 
         def objective(weights: np.ndarray) -> float:
-            return float(mean_squared_error(y_true, P @ weights))
+            pred = P @ weights
+            if calibration_mode != "none" and calibration_strength > 0.0:
+                calibrator = fit_prediction_calibrator(pred, y_true, calibration_mode, calibration_strength)
+                pred = calibrator.apply(pred)
+            return float(mean_squared_error(y_true, pred))
 
         constraints = {"type": "eq", "fun": lambda w: np.sum(w) - 1.0}
         bounds = [(0.0, 1.0)] * len(names)
-        x0 = np.ones(len(names), dtype=float) / len(names)
-        result = minimize(objective, x0, method="SLSQP", bounds=bounds, constraints=constraints, options={"maxiter": 1000})
-        if result.success:
-            weights = np.clip(result.x, 0.0, 1.0)
-            weights = weights / weights.sum()
-            return {name: float(weights[i]) for i, name in enumerate(names)}
+        starts = [np.ones(len(names), dtype=float) / len(names)]
+        starts.extend(np.eye(len(names), dtype=float))
+        rng = np.random.default_rng(seed)
+        starts.extend(rng.dirichlet(np.ones(len(names)), size=20))
+        best_weights = starts[0]
+        best_mse = objective(best_weights)
+        for x0 in starts:
+            result = minimize(
+                objective,
+                x0,
+                method="SLSQP",
+                bounds=bounds,
+                constraints=constraints,
+                options={"maxiter": 1000},
+            )
+            if result.success:
+                weights = np.clip(result.x, 0.0, 1.0)
+                weights = weights / weights.sum()
+                mse = objective(weights)
+                if mse < best_mse:
+                    best_mse = mse
+                    best_weights = weights
+        return {name: float(best_weights[i]) for i, name in enumerate(names)}
     except Exception:
         pass
 
     rng = np.random.default_rng(seed)
     best_weights = np.ones(len(names), dtype=float) / len(names)
-    best_mse = float(mean_squared_error(y_true, P @ best_weights))
+    best_pred = P @ best_weights
+    if calibration_mode != "none" and calibration_strength > 0.0:
+        best_pred = fit_prediction_calibrator(best_pred, y_true, calibration_mode, calibration_strength).apply(best_pred)
+    best_mse = float(mean_squared_error(y_true, best_pred))
     for _ in range(10000):
         weights = rng.dirichlet(np.ones(len(names)))
-        mse = float(mean_squared_error(y_true, P @ weights))
+        pred = P @ weights
+        if calibration_mode != "none" and calibration_strength > 0.0:
+            pred = fit_prediction_calibrator(pred, y_true, calibration_mode, calibration_strength).apply(pred)
+        mse = float(mean_squared_error(y_true, pred))
         if mse < best_mse:
             best_mse = mse
             best_weights = weights
