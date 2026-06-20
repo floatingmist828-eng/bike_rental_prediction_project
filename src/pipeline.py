@@ -48,7 +48,32 @@ EVENT_PROFILES = {
         "2012-10-30_13_18": 0.35,
         "2012-10-30_19_23": 0.50,
     },
+    "extreme": {
+        "2012-10-29": 0.15,
+        "2012-10-30_13_18": 0.25,
+        "2012-10-30_19_23": 0.40,
+    },
+    "extended": {
+        "2012-10-28_16_23": 0.75,
+        "2012-10-29": 0.20,
+        "2012-10-30_13_18": 0.30,
+        "2012-10-30_19_23": 0.45,
+        "2012-10-31_0_8": 0.85,
+    },
 }
+
+
+def _event_window_mask(dates: pd.Series, hours: np.ndarray, window_key: str) -> np.ndarray:
+    parts = window_key.split("_")
+    if len(parts) not in {1, 3}:
+        raise ValueError(f"Invalid event window key: {window_key}")
+
+    mask = dates.eq(pd.Timestamp(parts[0])).to_numpy()
+    if len(parts) == 3:
+        start_hour = int(parts[1])
+        end_hour = int(parts[2])
+        mask = mask & ((start_hour <= hours) & (hours <= end_hour))
+    return mask
 
 
 def apply_event_adjustments(
@@ -66,11 +91,8 @@ def apply_event_adjustments(
     factors_config = EVENT_PROFILES[profile]
 
     factors = np.ones(len(test_df), dtype=float)
-    factors[dates.eq(pd.Timestamp("2012-10-29")).to_numpy()] = factors_config["2012-10-29"]
-
-    sandy_1030 = dates.eq(pd.Timestamp("2012-10-30")).to_numpy()
-    factors[sandy_1030 & ((13 <= hours) & (hours <= 18))] = factors_config["2012-10-30_13_18"]
-    factors[sandy_1030 & ((19 <= hours) & (hours <= 23))] = factors_config["2012-10-30_19_23"]
+    for window_key, factor in factors_config.items():
+        factors[_event_window_mask(dates, hours, window_key)] = factor
 
     changed = factors != 1.0
     adjusted[changed] *= factors[changed]
@@ -159,6 +181,7 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
         },
     ]
     if has_count_branch:
+        raw_count_grid = [0.40000, 0.41500, 0.42000, 0.42500, 0.43000, 0.43500, 0.44000, 0.45000]
         recipes.extend(
             [
                 {
@@ -193,6 +216,15 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
                     "description": "current best public submission blended with count diversity",
                 },
             ]
+        )
+        recipes.extend(
+            {
+                "name": f"raw_count_{weight:.5f}".replace(".", "p"),
+                "weights": {"main_raw": 1.0 - weight, "count_calibrated": weight},
+                "description": "nearby raw/count proxy grid candidate for manual public-score probing",
+            }
+            for weight in raw_count_grid
+            if abs(weight - default_count_weight) > 1e-6
         )
     return recipes
 
@@ -243,7 +275,7 @@ def save_candidate_submissions(
 
         variants = [(name, pred_test, False, {"enabled": False, "changed_rows": 0, "mean_delta": 0.0})]
         if event_enabled:
-            for profile in ["mild", "default", "strong"]:
+            for profile in EVENT_PROFILES:
                 event_pred, event_meta = apply_event_adjustments(test_df, pred_test, profile=profile)
                 suffix = "event" if profile == "default" else f"event_{profile}"
                 variants.append((f"{name}_{suffix}", event_pred, True, event_meta))
@@ -650,8 +682,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed Sandy-window test adjustment")
     parser.add_argument(
         "--event-adjustment-profile",
-        choices=["mild", "default", "strong"],
-        default="default",
+        choices=list(EVENT_PROFILES),
+        default="strong",
         help="Sandy-window adjustment strength used for the main submission.csv",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
