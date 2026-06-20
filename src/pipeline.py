@@ -11,7 +11,6 @@ import pandas as pd
 from .config import ExperimentConfig, TARGET_COL
 from .features import make_features, make_sample_weight
 from .models import (
-    adjust_prediction_spread,
     fit_prediction_calibrator,
     fit_model,
     make_model_specs,
@@ -104,11 +103,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     )
     pred_valid_calibrated = calibrator.apply(pred_valid_ensemble)
     calibrated_metrics = regression_metrics(y_valid, pred_valid_calibrated)
-    pred_valid_final = np.minimum(
-        adjust_prediction_spread(pred_valid_calibrated, cfg.prediction_spread),
-        float(y_tr.max()),
-    )
-    final_metrics = regression_metrics(y_valid, pred_valid_final)
     metric_rows.append(
         {
             "model": "ensemble",
@@ -121,13 +115,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
             "model": "ensemble_calibrated",
             "target_transform": calibrator.mode,
             **calibrated_metrics,
-        }
-    )
-    metric_rows.append(
-        {
-            "model": "ensemble_final",
-            "target_transform": f"spread_{cfg.prediction_spread:g}",
-            **final_metrics,
         }
     )
 
@@ -145,11 +132,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     print(
         f"Validation calibrated MSE={calibrated_metrics['mse']:.6f} | "
         f"RMSE={calibrated_metrics['rmse']:.6f} | MAE={calibrated_metrics['mae']:.6f}"
-    )
-    print(
-        f"Prediction spread={cfg.prediction_spread:.3f} | "
-        f"Validation final MSE={final_metrics['mse']:.6f} | "
-        f"RMSE={final_metrics['rmse']:.6f} | MAE={final_metrics['mae']:.6f}"
     )
 
     metrics_path = cfg.output_dir / "validation_metrics.csv"
@@ -206,13 +188,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     if not final_predictions:
         raise RuntimeError("No final predictions were generated.")
 
-    pred_test = np.minimum(
-        adjust_prediction_spread(
-            calibrator.apply(weighted_average_predictions(final_predictions, weights)),
-            cfg.prediction_spread,
-        ),
-        float(y_full.max()),
-    )
+    pred_test = calibrator.apply(weighted_average_predictions(final_predictions, weights))
     submission = build_submission(test_df, pred_test)
     validate_submission(submission, test_df)
 
@@ -236,8 +212,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
             "strength": calibrator.strength,
         },
         "validation_calibrated": calibrated_metrics,
-        "prediction_spread": float(cfg.prediction_spread),
-        "validation_final": final_metrics,
         "submission_path": submission_path.as_posix(),
         "metrics_path": metrics_path.as_posix(),
     }
@@ -264,14 +238,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--calibration-strength",
         type=float,
-        default=0.55,
+        default=0.6,
         help="Shrink validation-fitted calibration toward raw predictions; 0 disables it, 1 applies it fully",
-    )
-    parser.add_argument(
-        "--prediction-spread",
-        type=float,
-        default=1.05,
-        help="Mean-preserving multiplier for prediction peak/valley contrast",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
     return parser.parse_args()
@@ -292,6 +260,5 @@ def main() -> None:
         validation_size=args.validation_size,
         calibration=args.calibration,
         calibration_strength=args.calibration_strength,
-        prediction_spread=args.prediction_spread,
     )
     run_experiment(cfg)

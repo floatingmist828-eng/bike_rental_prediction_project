@@ -15,18 +15,12 @@
     "mode": "affine",
     "slope": 1.0721213158884404,
     "intercept": 1.9422706906211022,
-    "strength": 0.55
+    "strength": 0.6
   },
   "validation_calibrated": {
-    "mse": 3144.4506833317428,
-    "rmse": 56.07540176701138,
-    "mae": 35.3215309909355
-  },
-  "prediction_spread": 1.05,
-  "validation_final": {
-    "mse": 3109.597794942565,
-    "rmse": 55.76376776135706,
-    "mae": 35.67212492768142
+    "mse": 3119.806017647629,
+    "rmse": 55.855223727487015,
+    "mae": 35.13067248814554
   },
   "submission_path": "outputs/submission.csv",
   "metrics_path": "outputs/validation_metrics.csv"

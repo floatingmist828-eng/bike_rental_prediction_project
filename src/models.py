@@ -318,19 +318,6 @@ def weighted_average_predictions(prediction_map: dict[str, np.ndarray], weights:
     return np.clip(pred, 0.0, None)
 
 
-def adjust_prediction_spread(pred: np.ndarray, spread: float = 1.0) -> np.ndarray:
-    """Slightly adjust peak/valley contrast while preserving the prediction level."""
-    values = np.asarray(pred, dtype=float)
-    spread = float(spread)
-    if not np.isfinite(spread) or spread <= 0.0:
-        spread = 1.0
-    if abs(spread - 1.0) < 1e-12 or values.size == 0:
-        return np.clip(values, 0.0, None)
-    center = float(np.mean(values))
-    adjusted = center + spread * (values - center)
-    return np.clip(adjusted, 0.0, None)
-
-
 def fit_prediction_calibrator(
     pred_valid: np.ndarray,
     y_valid: np.ndarray,
