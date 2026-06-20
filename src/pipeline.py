@@ -93,19 +93,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         raise RuntimeError("All models failed during validation.")
 
     weights = optimize_ensemble_weights(validation_predictions, y_valid, cfg.seed)
-    effective_weights = weights.copy()
-    if cfg.xgb_raw_blend_weight > 0.0 and "xgb_raw_horizon" in validation_predictions:
-        blend_weight = float(np.clip(cfg.xgb_raw_blend_weight, 0.0, 1.0))
-        anchor_weights = effective_weights.copy()
-        anchor_weights["xgb_raw_horizon"] = 0.0
-        anchor_total = sum(max(0.0, weight) for weight in anchor_weights.values())
-        if anchor_total > 0.0:
-            effective_weights = {
-                name: (1.0 - blend_weight) * max(0.0, weight) / anchor_total
-                for name, weight in anchor_weights.items()
-            }
-            effective_weights["xgb_raw_horizon"] = blend_weight
-    pred_valid_ensemble = weighted_average_predictions(validation_predictions, effective_weights)
+    pred_valid_ensemble = weighted_average_predictions(validation_predictions, weights)
     ensemble_metrics = regression_metrics(y_valid, pred_valid_ensemble)
     calibrator = fit_prediction_calibrator(
         pred_valid_ensemble,
@@ -131,7 +119,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     )
 
     print("\nValidation ensemble weights:")
-    for name, weight in sorted(effective_weights.items(), key=lambda kv: -kv[1]):
+    for name, weight in sorted(weights.items(), key=lambda kv: -kv[1]):
         print(f"  {name}: {weight:.6f}")
     print(
         f"Validation ensemble MSE={ensemble_metrics['mse']:.6f} | "
@@ -148,7 +136,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
 
     metrics_path = cfg.output_dir / "validation_metrics.csv"
     pd.DataFrame(metric_rows).to_csv(metrics_path, index=False)
-    save_json(effective_weights, cfg.output_dir / "ensemble_weights.json")
+    save_json(weights, cfg.output_dir / "ensemble_weights.json")
     save_json(
         {
             "mode": calibrator.mode,
@@ -177,13 +165,13 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     final_specs = make_model_specs(cfg.model_set, cfg.seed, cfg.n_jobs)
     final_predictions: dict[str, np.ndarray] = {}
 
-    successful_model_names = set(effective_weights.keys())
+    successful_model_names = set(weights.keys())
     for spec in final_specs:
         if spec.name not in successful_model_names:
             continue
-        if effective_weights.get(spec.name, 0.0) <= 1e-6:
+        if weights.get(spec.name, 0.0) <= 1e-6:
             continue
-        print(f"  fitting final {spec.name} with ensemble weight {effective_weights[spec.name]:.6f} ...", flush=True)
+        print(f"  fitting final {spec.name} with ensemble weight {weights[spec.name]:.6f} ...", flush=True)
         fit_model(spec, X_full, y_full, sample_weight=full_weight)
         final_predictions[spec.name] = predict_model(spec, X_test)
         if cfg.save_model:
@@ -193,14 +181,14 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
                 "target_transform": spec.target_transform,
                 "feature_columns": final_feature_columns,
                 "feature_mode": cfg.feature_mode,
-                "ensemble_weight": effective_weights[spec.name],
+                "ensemble_weight": weights[spec.name],
             }
             joblib.dump(model_payload, cfg.model_dir / f"{spec.name}.joblib")
 
     if not final_predictions:
         raise RuntimeError("No final predictions were generated.")
 
-    pred_test = calibrator.apply(weighted_average_predictions(final_predictions, effective_weights))
+    pred_test = calibrator.apply(weighted_average_predictions(final_predictions, weights))
     submission = build_submission(test_df, pred_test)
     validate_submission(submission, test_df)
 
@@ -217,7 +205,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         "n_jobs": int(cfg.n_jobs),
         "validation_size": int(len(valid_part)),
         "validation_ensemble": ensemble_metrics,
-        "xgb_raw_blend_weight": float(effective_weights.get("xgb_raw_horizon", 0.0)),
         "calibration": {
             "mode": calibrator.mode,
             "slope": calibrator.slope,
@@ -251,14 +238,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--calibration-strength",
         type=float,
-        default=0.5,
+        default=0.6,
         help="Shrink validation-fitted calibration toward raw predictions; 0 disables it, 1 applies it fully",
-    )
-    parser.add_argument(
-        "--xgb-raw-blend-weight",
-        type=float,
-        default=0.2,
-        help="Fixed blend weight for xgb_raw_horizon after validation-selected LightGBM anchor models",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
     return parser.parse_args()
@@ -279,6 +260,5 @@ def main() -> None:
         validation_size=args.validation_size,
         calibration=args.calibration,
         calibration_strength=args.calibration_strength,
-        xgb_raw_blend_weight=args.xgb_raw_blend_weight,
     )
     run_experiment(cfg)
