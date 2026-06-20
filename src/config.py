@@ -24,9 +24,9 @@ class ExperimentConfig:
     validation_size: int | None = None
     calibration: CalibrationMode = "affine"
     calibration_strength: float = 0.6
-    count_blend_weight: float = 0.45
+    count_blend_weight: float = 1.075
     event_adjustment: bool = True
-    event_adjustment_profile: str = "score_rebound_fit_weather3_soft"
+    event_adjustment_profile: str = "score_rebound_fit_weather3_overcount_late_hour"
 
 
 TARGET_COL = "cnt"

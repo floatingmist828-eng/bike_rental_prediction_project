@@ -4,11 +4,10 @@ import unittest
 from pathlib import Path
 
 from src.config import ExperimentConfig
-from src.pipeline import EVENT_PROFILES
 
 
 class ConfigDefaultTests(unittest.TestCase):
-    def test_default_event_profile_uses_validation_supported_adjustments(self) -> None:
+    def test_default_submission_uses_current_validation_best_candidate(self) -> None:
         cfg = ExperimentConfig(
             train_path=Path("data/train.csv"),
             test_path=Path("data/test.csv"),
@@ -16,10 +15,8 @@ class ConfigDefaultTests(unittest.TestCase):
             model_dir=Path("models"),
         )
 
-        profile = EVENT_PROFILES[cfg.event_adjustment_profile]
-        self.assertIn("weather3", profile)
-        self.assertIn("month_ge_8", profile)
-        self.assertIn("mul_hr_17", profile)
+        self.assertEqual(cfg.count_blend_weight, 1.075)
+        self.assertEqual(cfg.event_adjustment_profile, "score_rebound_fit_weather3_overcount_late_hour")
 
 
 if __name__ == "__main__":

@@ -16,16 +16,22 @@ class CandidateSummaryTests(unittest.TestCase):
             {
                 "ID": [10, 11],
                 "dteday": ["2012-10-02", "2012-10-02"],
+                "mnth": [10, 10],
                 "hr": [12, 13],
+                "workingday": [1, 1],
                 "weathersit": [3, 2],
+                "hum": [0.40, 0.40],
             }
         )
         valid_df = pd.DataFrame(
             {
                 "ID": [1, 2],
                 "dteday": ["2012-05-14", "2012-05-14"],
+                "mnth": [5, 5],
                 "hr": [12, 13],
+                "workingday": [1, 1],
                 "weathersit": [3, 2],
+                "hum": [0.40, 0.40],
             }
         )
         components = {
