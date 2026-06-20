@@ -10,6 +10,7 @@ env/
 
 models/
 *.joblib
+outputs/candidates/submission_*.csv
 
 .DS_Store
 Thumbs.db

@@ -90,6 +90,110 @@ def fit_predict_specs(
     return predictions
 
 
+def blend_named_predictions(components: dict[str, np.ndarray], weights: dict[str, float]) -> np.ndarray:
+    pred = None
+    for name, weight in weights.items():
+        values = components[name]
+        pred = values * weight if pred is None else pred + values * weight
+    if pred is None:
+        raise ValueError("No candidate components supplied.")
+    return np.clip(pred, 0.0, None)
+
+
+def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> list[dict[str, object]]:
+    recipes: list[dict[str, object]] = [
+        {
+            "name": "main_calibrated",
+            "weights": {"main_calibrated": 1.0},
+            "description": "validation-calibrated main LightGBM ensemble",
+        },
+        {
+            "name": "main_raw",
+            "weights": {"main_raw": 1.0},
+            "description": "uncalibrated main LightGBM ensemble",
+        },
+    ]
+    if has_count_branch:
+        recipes.extend(
+            [
+                {
+                    "name": f"raw_count_{default_count_weight:.5f}".replace(".", "p"),
+                    "weights": {"main_raw": 1.0 - default_count_weight, "count_calibrated": default_count_weight},
+                    "description": "public-score free optimum proxy: raw main plus count branch",
+                },
+                {
+                    "name": "raw_count_0p35000",
+                    "weights": {"main_raw": 0.65, "count_calibrated": 0.35},
+                    "description": "lower-count-weight candidate for robustness",
+                },
+                {
+                    "name": "public_constrained",
+                    "weights": {"main_raw": 0.20354, "main_calibrated": 0.50, "count_calibrated": 0.29646},
+                    "description": "public-score proxy with at least half calibrated main model",
+                },
+                {
+                    "name": "calibrated_count_0p27776",
+                    "weights": {"main_calibrated": 0.72224, "count_calibrated": 0.27776},
+                    "description": "current best public submission blended with count diversity",
+                },
+            ]
+        )
+    return recipes
+
+
+def save_candidate_submissions(
+    output_dir: Path,
+    test_df: pd.DataFrame,
+    test_components: dict[str, np.ndarray],
+    valid_components: dict[str, np.ndarray],
+    y_valid: np.ndarray,
+    default_count_weight: float,
+    event_enabled: bool,
+) -> list[dict[str, object]]:
+    candidate_dir = output_dir / "candidates"
+    candidate_dir.mkdir(parents=True, exist_ok=True)
+    rows: list[dict[str, object]] = []
+
+    for recipe in candidate_recipes("count_calibrated" in test_components, default_count_weight):
+        name = str(recipe["name"])
+        weights = dict(recipe["weights"])
+        pred_valid = blend_named_predictions(valid_components, weights)
+        pred_test = blend_named_predictions(test_components, weights)
+        valid_metrics = regression_metrics(y_valid, pred_valid)
+
+        variants = [(name, pred_test, False, {"enabled": False, "changed_rows": 0, "mean_delta": 0.0})]
+        if event_enabled:
+            event_pred, event_meta = apply_event_adjustments(test_df, pred_test)
+            variants.append((f"{name}_event", event_pred, True, event_meta))
+
+        for variant_name, variant_pred, uses_event, event_meta in variants:
+            submission = build_submission(test_df, variant_pred)
+            validate_submission(submission, test_df)
+            path = candidate_dir / f"submission_{variant_name}.csv"
+            submission.to_csv(path, index=False, float_format="%.6f")
+            rows.append(
+                {
+                    "candidate": variant_name,
+                    "path": path.as_posix(),
+                    "description": recipe["description"],
+                    "weights": ";".join(f"{k}:{v:.5f}" for k, v in weights.items()),
+                    "validation_mse": valid_metrics["mse"],
+                    "validation_rmse": valid_metrics["rmse"],
+                    "validation_mae": valid_metrics["mae"],
+                    "event_adjustment": uses_event,
+                    "event_changed_rows": int(event_meta.get("changed_rows", 0)),
+                    "mean": float(submission[TARGET_COL].mean()),
+                    "std": float(submission[TARGET_COL].std()),
+                    "min": float(submission[TARGET_COL].min()),
+                    "max": float(submission[TARGET_COL].max()),
+                }
+            )
+
+    summary_path = candidate_dir / "candidate_summary.csv"
+    pd.DataFrame(rows).to_csv(summary_path, index=False)
+    return rows
+
+
 def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     set_global_seed(cfg.seed)
     ensure_dirs(cfg.output_dir, cfg.model_dir)
@@ -187,6 +291,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     count_calibrator = None
     count_metrics = None
     blended_metrics = None
+    pred_valid_count_calibrated = None
     if cfg.model_set == "default" and count_blend_weight > 0.0:
         print("\n[1b/3] Count-objective diversity branch")
         count_specs = make_count_model_specs(cfg.seed, cfg.n_jobs)
@@ -303,7 +408,9 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         raise RuntimeError("No final predictions were generated.")
 
     raw_main_pred_test = weighted_average_predictions(final_predictions, weights)
-    pred_test = calibrator.apply(raw_main_pred_test)
+    main_calibrated_pred_test = calibrator.apply(raw_main_pred_test)
+    pred_test = main_calibrated_pred_test
+    count_pred_test = None
     if count_weights and count_calibrator is not None:
         count_specs_final = make_count_model_specs(cfg.seed, cfg.n_jobs)
         count_final_predictions: dict[str, np.ndarray] = {}
@@ -330,6 +437,28 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         if count_final_predictions:
             count_pred_test = count_calibrator.apply(weighted_average_predictions(count_final_predictions, count_weights))
             pred_test = (1.0 - count_blend_weight) * raw_main_pred_test + count_blend_weight * count_pred_test
+
+    valid_components = {
+        "main_raw": pred_valid_ensemble,
+        "main_calibrated": pred_valid_calibrated,
+    }
+    test_components = {
+        "main_raw": raw_main_pred_test,
+        "main_calibrated": main_calibrated_pred_test,
+    }
+    if count_pred_test is not None and pred_valid_count_calibrated is not None:
+        valid_components["count_calibrated"] = pred_valid_count_calibrated
+        test_components["count_calibrated"] = count_pred_test
+    candidate_rows = save_candidate_submissions(
+        cfg.output_dir,
+        test_df,
+        test_components,
+        valid_components,
+        y_valid,
+        count_blend_weight,
+        cfg.event_adjustment,
+    )
+
     if cfg.event_adjustment:
         pred_test, event_adjustment = apply_event_adjustments(test_df, pred_test)
     else:
@@ -368,6 +497,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
             "validation_blended": blended_metrics,
         },
         "event_adjustment": event_adjustment,
+        "candidate_submissions": candidate_rows,
         "validation_calibrated": calibrated_metrics,
         "submission_path": submission_path.as_posix(),
         "metrics_path": metrics_path.as_posix(),
