@@ -69,6 +69,26 @@ class EventProfileTests(unittest.TestCase):
         self.assertEqual(meta["profile"], "strong_core_0p33")
         self.assertEqual(meta["changed_rows"], 3)
 
+    def test_score_rebound_mid_raises_only_core_storm_rows_from_strong(self) -> None:
+        test_df = pd.DataFrame(
+            {
+                "dteday": [
+                    "2012-10-29",
+                    "2012-10-30",
+                    "2012-10-30",
+                    "2012-10-31",
+                ],
+                "hr": [0, 13, 19, 9],
+            }
+        )
+        pred = np.array([100.0, 200.0, 300.0, 400.0])
+
+        adjusted, meta = apply_event_adjustments(test_df, pred, profile="score_rebound_mid")
+
+        np.testing.assert_allclose(adjusted, np.array([30.0, 90.0, 150.0, 400.0]))
+        self.assertEqual(meta["profile"], "score_rebound_mid")
+        self.assertEqual(meta["changed_rows"], 3)
+
     def test_observed_public_mse_records_known_submission_score(self) -> None:
         self.assertEqual(observed_public_mse("raw_count_0p42764_event_strong"), 2886.37549)
         self.assertEqual(observed_public_mse("raw_count_0p42764_event_empirical_storm"), 2889.86619)

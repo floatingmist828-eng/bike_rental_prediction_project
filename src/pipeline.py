@@ -73,6 +73,21 @@ EVENT_PROFILES = {
         "2012-10-30_13_18": 0.35,
         "2012-10-30_19_23": 0.55,
     },
+    "score_rebound_light": {
+        "2012-10-29": 0.28,
+        "2012-10-30_13_18": 0.40,
+        "2012-10-30_19_23": 0.50,
+    },
+    "score_rebound_mid": {
+        "2012-10-29": 0.30,
+        "2012-10-30_13_18": 0.45,
+        "2012-10-30_19_23": 0.50,
+    },
+    "score_rebound_fit": {
+        "2012-10-29": 0.35,
+        "2012-10-30_13_18": 0.55,
+        "2012-10-30_19_23": 0.50,
+    },
     "stronger": {
         "2012-10-29": 0.20,
         "2012-10-30_13_18": 0.30,
@@ -767,7 +782,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--event-adjustment-profile",
         choices=list(EVENT_PROFILES),
-        default="strong",
+        default="score_rebound_mid",
         help="Sandy-window adjustment strength used for the main submission.csv",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
