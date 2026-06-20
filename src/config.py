@@ -8,7 +8,6 @@ from typing import Literal
 FeatureMode = Literal["base", "advanced"]
 ModelSet = Literal["default", "quick", "sklearn"]
 CalibrationMode = Literal["none", "scale", "affine"]
-ResidualGroup = Literal["none", "hr_weekday"]
 
 
 @dataclass(frozen=True)
@@ -24,11 +23,7 @@ class ExperimentConfig:
     save_model: bool = True
     validation_size: int | None = None
     calibration: CalibrationMode = "affine"
-    calibration_strength: float = 0.5
-    residual_group: ResidualGroup = "hr_weekday"
-    residual_smoothing: float = 20.0
-    residual_strength: float = 0.5
-    residual_mean_neutral: bool = True
+    calibration_strength: float = 0.6
 
 
 TARGET_COL = "cnt"

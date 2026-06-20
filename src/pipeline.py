@@ -12,7 +12,6 @@ from .config import ExperimentConfig, TARGET_COL
 from .features import make_features, make_sample_weight
 from .models import (
     fit_prediction_calibrator,
-    fit_residual_corrector,
     fit_model,
     make_model_specs,
     optimize_ensemble_weights,
@@ -104,17 +103,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     )
     pred_valid_calibrated = calibrator.apply(pred_valid_ensemble)
     calibrated_metrics = regression_metrics(y_valid, pred_valid_calibrated)
-    residual_corrector = fit_residual_corrector(
-        valid_part,
-        pred_valid_calibrated,
-        y_valid,
-        cfg.residual_group,
-        cfg.residual_smoothing,
-        cfg.residual_strength,
-        cfg.residual_mean_neutral,
-    )
-    pred_valid_corrected = residual_corrector.apply(valid_part, pred_valid_calibrated)
-    corrected_metrics = regression_metrics(y_valid, pred_valid_corrected)
     metric_rows.append(
         {
             "model": "ensemble",
@@ -127,13 +115,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
             "model": "ensemble_calibrated",
             "target_transform": calibrator.mode,
             **calibrated_metrics,
-        }
-    )
-    metric_rows.append(
-        {
-            "model": "ensemble_residual_corrected",
-            "target_transform": residual_corrector.group,
-            **corrected_metrics,
         }
     )
 
@@ -152,15 +133,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         f"Validation calibrated MSE={calibrated_metrics['mse']:.6f} | "
         f"RMSE={calibrated_metrics['rmse']:.6f} | MAE={calibrated_metrics['mae']:.6f}"
     )
-    print(
-        f"Residual correction group={residual_corrector.group} | "
-        f"smoothing={residual_corrector.smoothing:.3f} | strength={residual_corrector.strength:.3f} | "
-        f"mean_neutral={residual_corrector.mean_neutral}"
-    )
-    print(
-        f"Validation corrected MSE={corrected_metrics['mse']:.6f} | "
-        f"RMSE={corrected_metrics['rmse']:.6f} | MAE={corrected_metrics['mae']:.6f}"
-    )
 
     metrics_path = cfg.output_dir / "validation_metrics.csv"
     pd.DataFrame(metric_rows).to_csv(metrics_path, index=False)
@@ -174,7 +146,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         },
         cfg.output_dir / "calibration.json",
     )
-    save_json(residual_corrector.summary(), cfg.output_dir / "residual_correction.json")
     save_json(feature_columns, cfg.output_dir / "feature_columns.json")
 
     # Final stage: train on the full train.csv and predict test.csv.
@@ -217,8 +188,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     if not final_predictions:
         raise RuntimeError("No final predictions were generated.")
 
-    pred_test_calibrated = calibrator.apply(weighted_average_predictions(final_predictions, weights))
-    pred_test = residual_corrector.apply(test_df, pred_test_calibrated)
+    pred_test = calibrator.apply(weighted_average_predictions(final_predictions, weights))
     submission = build_submission(test_df, pred_test)
     validate_submission(submission, test_df)
 
@@ -242,8 +212,6 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
             "strength": calibrator.strength,
         },
         "validation_calibrated": calibrated_metrics,
-        "residual_correction": residual_corrector.summary(),
-        "validation_corrected": corrected_metrics,
         "submission_path": submission_path.as_posix(),
         "metrics_path": metrics_path.as_posix(),
     }
@@ -270,21 +238,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--calibration-strength",
         type=float,
-        default=0.5,
+        default=0.6,
         help="Shrink validation-fitted calibration toward raw predictions; 0 disables it, 1 applies it fully",
-    )
-    parser.add_argument(
-        "--residual-group",
-        choices=["none", "hr_weekday"],
-        default="hr_weekday",
-        help="Optional smoothed validation residual correction group",
-    )
-    parser.add_argument("--residual-smoothing", type=float, default=20.0)
-    parser.add_argument("--residual-strength", type=float, default=0.5)
-    parser.add_argument(
-        "--residual-allow-mean-shift",
-        action="store_true",
-        help="Allow residual correction to shift the average prediction level",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
     return parser.parse_args()
@@ -305,9 +260,5 @@ def main() -> None:
         validation_size=args.validation_size,
         calibration=args.calibration,
         calibration_strength=args.calibration_strength,
-        residual_group=args.residual_group,
-        residual_smoothing=args.residual_smoothing,
-        residual_strength=args.residual_strength,
-        residual_mean_neutral=not args.residual_allow_mean_shift,
     )
     run_experiment(cfg)

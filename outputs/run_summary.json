@@ -15,28 +15,12 @@
     "mode": "affine",
     "slope": 1.0721213158884404,
     "intercept": 1.9422706906211022,
-    "strength": 0.5
+    "strength": 0.6
   },
   "validation_calibrated": {
-    "mse": 3171.9947214492813,
-    "rmse": 56.32046449958737,
-    "mae": 35.534278727407944
-  },
-  "residual_correction": {
-    "group": "hr_weekday",
-    "columns": [
-      "hr",
-      "weekday"
-    ],
-    "smoothing": 20.0,
-    "strength": 0.5,
-    "mean_neutral": true,
-    "n_corrections": 168
-  },
-  "validation_corrected": {
-    "mse": 2986.9730194904187,
-    "rmse": 54.65320685458831,
-    "mae": 34.302926073795334
+    "mse": 3119.806017647629,
+    "rmse": 55.855223727487015,
+    "mae": 35.13067248814554
   },
   "submission_path": "outputs/submission.csv",
   "metrics_path": "outputs/validation_metrics.csv"
