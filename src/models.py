@@ -11,7 +11,6 @@ from sklearn.metrics import mean_squared_error
 
 TargetTransform = Literal["raw", "log1p"]
 CalibrationMode = Literal["none", "scale", "affine"]
-ResidualGroup = Literal["none", "hr_weekday"]
 
 
 @dataclass
@@ -39,52 +38,6 @@ class PredictionCalibrator:
             raise ValueError(f"Unknown calibration mode: {self.mode}")
         calibrated = np.nan_to_num(calibrated, nan=0.0, posinf=0.0, neginf=0.0)
         return np.clip(calibrated, 0.0, None)
-
-
-@dataclass(frozen=True)
-class ResidualCorrector:
-    group: ResidualGroup = "none"
-    columns: tuple[str, ...] = ()
-    corrections: pd.Series | None = None
-    smoothing: float = 0.0
-    strength: float = 0.0
-
-    def apply(self, frame: pd.DataFrame, pred: np.ndarray) -> np.ndarray:
-        values = np.asarray(pred, dtype=float)
-        if self.group == "none" or self.corrections is None or not self.columns:
-            return np.clip(values, 0.0, None)
-        idx = _group_index(frame, self.columns)
-        adjustment = self.corrections.reindex(idx).fillna(0.0).to_numpy(dtype=float)
-        return np.clip(values + self.strength * adjustment, 0.0, None)
-
-    def to_jsonable(self) -> dict[str, object]:
-        records: list[dict[str, object]] = []
-        if self.corrections is not None:
-            for key, value in self.corrections.items():
-                raw_key_values = list(key) if isinstance(key, tuple) else [key]
-                key_values = [item.item() if hasattr(item, "item") else item for item in raw_key_values]
-                records.append({"key": key_values, "value": float(value)})
-        return {
-            "group": self.group,
-            "columns": list(self.columns),
-            "smoothing": float(self.smoothing),
-            "strength": float(self.strength),
-            "corrections": records,
-        }
-
-
-def _residual_group_columns(group: ResidualGroup) -> tuple[str, ...]:
-    if group == "none":
-        return ()
-    if group == "hr_weekday":
-        return ("hr", "weekday")
-    raise ValueError(f"Unknown residual group: {group}")
-
-
-def _group_index(frame: pd.DataFrame, columns: tuple[str, ...]) -> pd.Index | pd.MultiIndex:
-    if len(columns) == 1:
-        return pd.Index(frame[columns[0]])
-    return pd.MultiIndex.from_frame(frame[list(columns)])
 
 
 def _has_module(module_name: str) -> bool:
@@ -401,38 +354,3 @@ def fit_prediction_calibrator(
         )
 
     raise ValueError(f"Unknown calibration mode: {mode}")
-
-
-def fit_residual_corrector(
-    frame: pd.DataFrame,
-    pred_valid: np.ndarray,
-    y_valid: np.ndarray,
-    group: ResidualGroup = "none",
-    smoothing: float = 20.0,
-    strength: float = 1.0,
-) -> ResidualCorrector:
-    group_columns = _residual_group_columns(group)
-    strength = float(np.clip(strength, 0.0, 1.0))
-    smoothing = max(0.0, float(smoothing))
-    if group == "none" or not group_columns or strength <= 0.0:
-        return ResidualCorrector(group="none", strength=0.0)
-
-    pred = np.asarray(pred_valid, dtype=float)
-    target = np.asarray(y_valid, dtype=float)
-    if pred.shape != target.shape:
-        raise ValueError("pred_valid and y_valid must have the same shape.")
-    missing = [col for col in group_columns if col not in frame.columns]
-    if missing:
-        raise ValueError(f"Residual correction columns are missing: {missing}")
-
-    tmp = frame.loc[:, list(group_columns)].copy()
-    tmp["_residual"] = target - pred
-    stats = tmp.groupby(list(group_columns))["_residual"].agg(["sum", "count"])
-    corrections = stats["sum"] / (stats["count"] + smoothing)
-    return ResidualCorrector(
-        group=group,
-        columns=group_columns,
-        corrections=corrections.astype(float),
-        smoothing=smoothing,
-        strength=strength,
-    )
