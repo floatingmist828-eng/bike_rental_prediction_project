@@ -131,6 +131,28 @@ class EventProfileTests(unittest.TestCase):
         self.assertEqual(meta["profile"], "score_rebound_fit_holiday_soft")
         self.assertEqual(meta["changed_rows"], 5)
 
+    def test_score_rebound_fit_holiday_strong_uses_larger_winter_holiday_cuts(self) -> None:
+        test_df = pd.DataFrame(
+            {
+                "dteday": [
+                    "2012-10-29",
+                    "2012-10-30",
+                    "2012-11-22",
+                    "2012-12-24",
+                    "2012-12-25",
+                    "2012-12-31",
+                ],
+                "hr": [0, 13, 12, 18, 12, 12],
+            }
+        )
+        pred = np.array([100.0, 200.0, 300.0, 400.0, 500.0, 600.0])
+
+        adjusted, meta = apply_event_adjustments(test_df, pred, profile="score_rebound_fit_holiday_strong")
+
+        np.testing.assert_allclose(adjusted, np.array([35.0, 110.0, 195.0, 280.0, 300.0, 600.0]))
+        self.assertEqual(meta["profile"], "score_rebound_fit_holiday_strong")
+        self.assertEqual(meta["changed_rows"], 5)
+
     def test_observed_public_mse_records_known_submission_score(self) -> None:
         self.assertEqual(observed_public_mse("legacy_raw_count_0p42764_event_strong"), 2886.37549)
         self.assertEqual(observed_public_mse("legacy_raw_count_0p42764_event_empirical_storm"), 2889.86619)

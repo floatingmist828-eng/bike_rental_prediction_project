@@ -382,6 +382,24 @@
       "max": 959.1036291888294
     },
     {
+      "candidate": "main_calibrated_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_main_calibrated_event_score_rebound_fit_holiday_strong.csv",
+      "description": "validation-calibrated main LightGBM ensemble",
+      "weights": "main_calibrated:1.00000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 3044.724034446174,
+      "validation_rmse": 55.17901806344667,
+      "validation_mae": 34.76371987918282,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 242.24490488690094,
+      "std": 202.4016215806847,
+      "min": 2.5640015637642515,
+      "max": 959.1036291888294
+    },
+    {
       "candidate": "main_calibrated_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_main_calibrated_event_score_rebound_2p25.csv",
       "description": "validation-calibrated main LightGBM ensemble",
@@ -919,6 +937,24 @@
       "mean": 241.4543175690986,
       "std": 201.8326326496563,
       "min": 2.522128895291644,
+      "max": 956.4964588808893
+    },
+    {
+      "candidate": "main_calibrated_0p4_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_main_calibrated_0p4_event_score_rebound_fit_holiday_strong.csv",
+      "description": "weaker main calibration previously observed as a competitive public-score variant",
+      "weights": "main_calibrated_0p4:1.00000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 3051.561920613311,
+      "validation_rmse": 55.24094424078313,
+      "validation_mae": 34.78201438640816,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 241.21545858716703,
+      "std": 201.95386616451358,
+      "min": 2.2068627833801884,
       "max": 956.4964588808893
     },
     {
@@ -1462,6 +1498,24 @@
       "max": 964.3179698047095
     },
     {
+      "candidate": "main_calibrated_1p0_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_main_calibrated_1p0_event_score_rebound_fit_holiday_strong.csv",
+      "description": "full affine main calibration variant",
+      "weights": "main_calibrated_1p0:1.00000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 3039.2537255124657,
+      "validation_rmse": 55.129427037766916,
+      "validation_mae": 34.81190479772913,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 244.30379748636875,
+      "std": 203.2971443690241,
+      "min": 3.2782791245323777,
+      "max": 964.3179698047095
+    },
+    {
       "candidate": "main_calibrated_1p0_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_main_calibrated_1p0_event_score_rebound_2p25.csv",
       "description": "full affine main calibration variant",
@@ -1999,6 +2053,24 @@
       "mean": 239.39234722887613,
       "std": 200.93960356991872,
       "min": 1.705811682985214,
+      "max": 951.2821182650092
+    },
+    {
+      "candidate": "main_raw_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_main_raw_event_score_rebound_fit_holiday_strong.csv",
+      "description": "uncalibrated main LightGBM ensemble",
+      "weights": "main_raw:1.00000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 3073.443156348147,
+      "validation_rmse": 55.438643168354574,
+      "validation_mae": 34.91020450163607,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 239.15656598769922,
+      "std": 201.05836742129813,
+      "min": 1.4925852226120622,
       "max": 951.2821182650092
     },
     {
@@ -2542,6 +2614,24 @@
       "max": 1021.6657669874576
     },
     {
+      "candidate": "raw_count_0p45000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p45000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "default validation-guided raw main plus count branch",
+      "weights": "main_raw:0.55000;count_calibrated:0.45000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2854.730809105648,
+      "validation_rmse": 53.429680975143846,
+      "validation_mae": 33.64028877557413,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 254.66364281571794,
+      "std": 214.57286441624956,
+      "min": 2.1927849995068533,
+      "max": 1021.6657669874576
+    },
+    {
       "candidate": "raw_count_0p45000_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p45000_event_score_rebound_2p25.csv",
       "description": "default validation-guided raw main plus count branch",
@@ -3079,6 +3169,24 @@
       "mean": 251.45767614481196,
       "std": 211.41940930044038,
       "min": 2.3282114846694726,
+      "max": 1006.0249561602468
+    },
+    {
+      "candidate": "raw_count_0p35000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p35000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "lower-count-weight candidate for robustness",
+      "weights": "main_raw:0.65000;count_calibrated:0.35000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2892.2049958465973,
+      "validation_rmse": 53.77922457461243,
+      "validation_mae": 33.857460321221986,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 251.21762574282482,
+      "std": 211.54560478404576,
+      "min": 2.0371850490857883,
       "max": 1006.0249561602468
     },
     {
@@ -3622,6 +3730,24 @@
       "max": 1001.5616215052682
     },
     {
+      "candidate": "public_constrained_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_public_constrained_event_score_rebound_fit_holiday_strong.csv",
+      "description": "legacy conservative blend with at least half calibrated main model",
+      "weights": "main_raw:0.20354;main_calibrated:0.50000;count_calibrated:0.29646",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2903.520645807392,
+      "validation_rmse": 53.88432653200179,
+      "validation_mae": 33.93218399527826,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 250.91679765159878,
+      "std": 210.60167486702105,
+      "min": 2.4895850062064446,
+      "max": 1001.5616215052682
+    },
+    {
       "candidate": "public_constrained_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_public_constrained_event_score_rebound_2p25.csv",
       "description": "legacy conservative blend with at least half calibrated main model",
@@ -4159,6 +4285,24 @@
       "mean": 248.98773077413927,
       "std": 208.830616331165,
       "min": 2.5372846758472973,
+      "max": 992.8555342113386
+    },
+    {
+      "candidate": "public_count_cap_0p25_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_public_count_cap_0p25_event_score_rebound_fit_holiday_strong.csv",
+      "description": "legacy conservative blend with count branch capped at 0.25",
+      "weights": "main_raw:0.44251;main_calibrated_0p4:0.16741;main_calibrated:0.04365;main_calibrated_1p0:0.09643;count_calibrated:0.25000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2927.5409794210987,
+      "validation_rmse": 54.1067553954319,
+      "validation_mae": 34.06596431751486,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 248.7474414063756,
+      "std": 208.9559433512572,
+      "min": 2.220124091366385,
       "max": 992.8555342113386
     },
     {
@@ -4702,6 +4846,24 @@
       "max": 1000.3750424682896
     },
     {
+      "candidate": "calibrated_count_0p27776_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_calibrated_count_0p27776_event_score_rebound_fit_holiday_strong.csv",
+      "description": "current best public submission blended with count diversity",
+      "weights": "main_calibrated:0.72224;count_calibrated:0.27776",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2908.242761500269,
+      "validation_rmse": 53.92812588529541,
+      "validation_mae": 33.96649257841617,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 250.95874489592634,
+      "std": 210.33686037792435,
+      "min": 2.6985993831353685,
+      "max": 1000.3750424682896
+    },
+    {
       "candidate": "calibrated_count_0p27776_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_calibrated_count_0p27776_event_score_rebound_2p25.csv",
       "description": "current best public submission blended with count diversity",
@@ -5239,6 +5401,24 @@
       "mean": 248.01043931168743,
       "std": 208.40743270939583,
       "min": 2.150382969902542,
+      "max": 990.384145333036
+    },
+    {
+      "candidate": "raw_count_0p25000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p25000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.75000;count_calibrated:0.25000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2936.0383580679563,
+      "validation_rmse": 54.18522269095105,
+      "validation_mae": 34.114943141279646,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 247.7716086699318,
+      "std": 208.53158579063302,
+      "min": 1.8815850986647238,
       "max": 990.384145333036
     },
     {
@@ -5782,6 +5962,24 @@
       "max": 1013.8453615738522
     },
     {
+      "candidate": "raw_count_0p40000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p40000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.60000;count_calibrated:0.40000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2872.6730055410712,
+      "validation_rmse": 53.59732274602036,
+      "validation_mae": 33.744508843180654,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 252.94063427927136,
+      "std": 213.05761473710362,
+      "min": 2.1149850242963213,
+      "max": 1013.8453615738522
+    },
+    {
       "candidate": "raw_count_0p40000_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p40000_event_score_rebound_2p25.csv",
       "description": "raw/count validation grid candidate for manual public-score probing",
@@ -6319,6 +6517,24 @@
       "mean": 253.69838008634287,
       "std": 213.3843622867774,
       "min": 2.4438000192679783,
+      "max": 1016.1914831979337
+    },
+    {
+      "candidate": "raw_count_0p41500_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p41500_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.58500;count_calibrated:0.41500",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2867.1234182540834,
+      "validation_rmse": 53.545526594236456,
+      "validation_mae": 33.712349818334566,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 253.4575368402053,
+      "std": 213.51185260511926,
+      "min": 2.1383250168594805,
       "max": 1016.1914831979337
     },
     {
@@ -6862,6 +7078,24 @@
       "max": 1016.9735237392945
     },
     {
+      "candidate": "raw_count_0p42000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p42000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.58000;count_calibrated:0.42000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2865.3053517024896,
+      "validation_rmse": 53.52854707259006,
+      "validation_mae": 33.701780978372405,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 253.62983769384996,
+      "std": 213.66332969819246,
+      "min": 2.1461050143805336,
+      "max": 1016.9735237392945
+    },
+    {
       "candidate": "raw_count_0p42000_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p42000_event_score_rebound_2p25.csv",
       "description": "raw/count validation grid candidate for manual public-score probing",
@@ -7399,6 +7633,24 @@
       "mean": 253.95692284882722,
       "std": 213.61144219138464,
       "min": 2.457137157875498,
+      "max": 1017.3645440099747
+    },
+    {
+      "candidate": "raw_count_0p42250_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p42250_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.57750;count_calibrated:0.42250",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2864.4022801537058,
+      "validation_rmse": 53.520110987867966,
+      "validation_mae": 33.69655983188393,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 253.71598812067228,
+      "std": 213.73908029438326,
+      "min": 2.1499950131410603,
       "max": 1017.3645440099747
     },
     {
@@ -7942,6 +8194,24 @@
       "max": 1017.7555642806548
     },
     {
+      "candidate": "raw_count_0p42500_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p42500_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.57500;count_calibrated:0.42500",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2863.5031830895964,
+      "validation_rmse": 53.51171070980254,
+      "validation_mae": 33.691374228978326,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 253.80213854749462,
+      "std": 213.81483891229325,
+      "min": 2.153885011901587,
+      "max": 1017.7555642806548
+    },
+    {
       "candidate": "raw_count_0p42500_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p42500_event_score_rebound_2p25.csv",
       "description": "raw/count validation grid candidate for manual public-score probing",
@@ -8479,6 +8749,24 @@
       "mean": 254.2154656113116,
       "std": 213.83859462282405,
       "min": 2.470474296483018,
+      "max": 1018.5376048220155
+    },
+    {
+      "candidate": "raw_count_0p43000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p43000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.57000;count_calibrated:0.43000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2861.7169124154047,
+      "validation_rmse": 53.4950176410421,
+      "validation_mae": 33.68103525679928,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 253.9744394011393,
+      "std": 213.9663801791873,
+      "min": 2.1616650094226406,
       "max": 1018.5376048220155
     },
     {
@@ -9022,6 +9310,24 @@
       "max": 1018.9286250926957
     },
     {
+      "candidate": "raw_count_0p43250_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p43250_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.56750;count_calibrated:0.43250",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2860.8297388053224,
+      "validation_rmse": 53.486724883893594,
+      "validation_mae": 33.67590061455676,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 254.0605898279616,
+      "std": 214.0421628111573,
+      "min": 2.165555008183167,
+      "max": 1018.9286250926957
+    },
+    {
       "candidate": "raw_count_0p43250_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p43250_event_score_rebound_2p25.csv",
       "description": "raw/count validation grid candidate for manual public-score probing",
@@ -9559,6 +9865,24 @@
       "mean": 254.38782745296774,
       "std": 213.9900697557484,
       "min": 2.479365722221364,
+      "max": 1019.3196453633759
+    },
+    {
+      "candidate": "raw_count_0p43500_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p43500_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.56500;count_calibrated:0.43500",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2859.946539679914,
+      "validation_rmse": 53.4784680004945,
+      "validation_mae": 33.67077529500364,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 254.14674025478388,
+      "std": 214.11795343081866,
+      "min": 2.1694450069436932,
       "max": 1019.3196453633759
     },
     {
@@ -10102,6 +10426,24 @@
       "max": 1019.7106656340561
     },
     {
+      "candidate": "raw_count_0p43750_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p43750_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.56250;count_calibrated:0.43750",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2859.067315039182,
+      "validation_rmse": 53.47024700746371,
+      "validation_mae": 33.6656499754505,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 254.23289068160625,
+      "std": 214.1937520296922,
+      "min": 2.17333500570422,
+      "max": 1019.7106656340561
+    },
+    {
       "candidate": "raw_count_0p43750_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p43750_event_score_rebound_2p25.csv",
       "description": "raw/count validation grid candidate for manual public-score probing",
@@ -10639,6 +10981,24 @@
       "mean": 254.56018929462405,
       "std": 214.14157695200197,
       "min": 2.488257147959711,
+      "max": 1020.1016859047365
+    },
+    {
+      "candidate": "raw_count_0p44000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p44000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.56000;count_calibrated:0.44000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2858.192064883124,
+      "validation_rmse": 53.462061921358064,
+      "validation_mae": 33.66052465589736,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 254.31904110842862,
+      "std": 214.26955859930987,
+      "min": 2.177225004464747,
       "max": 1020.1016859047365
     },
     {
@@ -11182,6 +11542,24 @@
       "max": 1020.883726446097
     },
     {
+      "candidate": "raw_count_0p44500_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p44500_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.55500;count_calibrated:0.44500",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2856.4534880250358,
+      "validation_rmse": 53.44579953583851,
+      "validation_mae": 33.65032931862798,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 254.49134196207322,
+      "std": 214.42119561696103,
+      "min": 2.1850050019858,
+      "max": 1020.883726446097
+    },
+    {
       "candidate": "raw_count_0p44500_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p44500_event_score_rebound_2p25.csv",
       "description": "raw/count validation grid candidate for manual public-score probing",
@@ -11719,6 +12097,24 @@
       "mean": 255.7667221862176,
       "std": 215.20301940873642,
       "min": 2.550497128128137,
+      "max": 1025.5759696942603
+    },
+    {
+      "candidate": "raw_count_0p47500_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p47500_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.52500;count_calibrated:0.47500",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2846.3558835892245,
+      "validation_rmse": 53.35125006585342,
+      "validation_mae": 33.592244821663925,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 255.52514708394116,
+      "std": 215.3316827862935,
+      "min": 2.2316849871121196,
       "max": 1025.5759696942603
     },
     {
@@ -12262,6 +12658,24 @@
       "max": 1029.486172401063
     },
     {
+      "candidate": "raw_count_0p50000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p50000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.50000;count_calibrated:0.50000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2838.3784065403265,
+      "validation_rmse": 53.2764338759674,
+      "validation_mae": 33.54620230189283,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 256.3866513521644,
+      "std": 216.0912856698254,
+      "min": 2.2705849747173854,
+      "max": 1029.486172401063
+    },
+    {
       "candidate": "raw_count_0p50000_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p50000_event_score_rebound_2p25.csv",
       "description": "raw/count validation grid candidate for manual public-score probing",
@@ -12799,6 +13213,24 @@
       "mean": 257.4903406027799,
       "std": 216.72203976211287,
       "min": 2.639411385511602,
+      "max": 1033.3963751078654
+    },
+    {
+      "candidate": "raw_count_0p52500_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p52500_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.47500;count_calibrated:0.52500",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2830.798377958955,
+      "validation_rmse": 53.20524765433345,
+      "validation_mae": 33.503232921460544,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 257.24815562038765,
+      "std": 216.85166482270242,
+      "min": 2.3094849623226517,
       "max": 1033.3963751078654
     },
     {
@@ -13342,6 +13774,24 @@
       "max": 1037.3065778146683
     },
     {
+      "candidate": "raw_count_0p55000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p55000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.45000;count_calibrated:0.55000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2823.615797845109,
+      "validation_rmse": 53.137705989674686,
+      "validation_mae": 33.46341851392418,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 258.10965988861096,
+      "std": 217.61281210764156,
+      "min": 2.3483849499279184,
+      "max": 1037.3065778146683
+    },
+    {
       "candidate": "raw_count_0p55000_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p55000_event_score_rebound_2p25.csv",
       "description": "raw/count validation grid candidate for manual public-score probing",
@@ -13879,6 +14329,24 @@
       "mean": 260.0757682276232,
       "std": 219.0063378201435,
       "min": 2.772782771586801,
+      "max": 1045.1269832282737
+    },
+    {
+      "candidate": "raw_count_0p60000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p60000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.40000;count_calibrated:0.60000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2810.442983019993,
+      "validation_rmse": 53.01361129955205,
+      "validation_mae": 33.3897456866895,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 259.8326684250574,
+      "std": 219.1373790494608,
+      "min": 2.4261849251384504,
       "max": 1045.1269832282737
     },
     {
@@ -14422,6 +14890,24 @@
       "max": 1052.9473886418791
     },
     {
+      "candidate": "raw_count_0p65000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p65000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.35000;count_calibrated:0.65000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2798.8599620649793,
+      "validation_rmse": 52.904252778628106,
+      "validation_mae": 33.32406605277415,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 261.555676961504,
+      "std": 220.66492347505564,
+      "min": 2.5039849003489825,
+      "max": 1052.9473886418791
+    },
+    {
       "candidate": "raw_count_0p65000_event_score_rebound_2p25",
       "path": "outputs/candidates/submission_raw_count_0p65000_event_score_rebound_2p25.csv",
       "description": "raw/count validation grid candidate for manual public-score probing",
@@ -14959,6 +15445,24 @@
       "mean": 263.5230050607478,
       "std": 222.06250220629323,
       "min": 2.9506112863537317,
+      "max": 1060.7677940554845
+    },
+    {
+      "candidate": "raw_count_0p70000_event_score_rebound_fit_holiday_strong",
+      "path": "outputs/candidates/submission_raw_count_0p70000_event_score_rebound_fit_holiday_strong.csv",
+      "description": "raw/count validation grid candidate for manual public-score probing",
+      "weights": "main_raw:0.30000;count_calibrated:0.70000",
+      "public_proxy_mse": null,
+      "observed_public_mse": null,
+      "validation_mse": 2788.866734980068,
+      "validation_rmse": 52.80972197408417,
+      "validation_mae": 33.26507936670229,
+      "event_adjustment": true,
+      "event_profile": "score_rebound_fit_holiday_strong",
+      "event_changed_rows": 82,
+      "mean": 263.27868549795045,
+      "std": 222.19538397579507,
+      "min": 2.581784875559515,
       "max": 1060.7677940554845
     },
     {
