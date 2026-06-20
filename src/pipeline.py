@@ -398,6 +398,8 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
             0.60000,
             0.65000,
             0.70000,
+            0.75000,
+            0.80000,
         ]
         recipes.extend(
             [
