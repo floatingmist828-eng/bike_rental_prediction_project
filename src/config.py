@@ -25,6 +25,7 @@ class ExperimentConfig:
     calibration: CalibrationMode = "affine"
     calibration_strength: float = 0.6
     count_blend_weight: float = 0.42764
+    event_adjustment: bool = True
 
 
 TARGET_COL = "cnt"

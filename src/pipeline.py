@@ -330,7 +330,15 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         if count_final_predictions:
             count_pred_test = count_calibrator.apply(weighted_average_predictions(count_final_predictions, count_weights))
             pred_test = (1.0 - count_blend_weight) * raw_main_pred_test + count_blend_weight * count_pred_test
-    pred_test, event_adjustment = apply_event_adjustments(test_df, pred_test)
+    if cfg.event_adjustment:
+        pred_test, event_adjustment = apply_event_adjustments(test_df, pred_test)
+    else:
+        event_adjustment = {
+            "enabled": False,
+            "method": "none",
+            "changed_rows": 0,
+            "mean_delta": 0.0,
+        }
     submission = build_submission(test_df, pred_test)
     validate_submission(submission, test_df)
 
@@ -396,6 +404,7 @@ def parse_args() -> argparse.Namespace:
         default=0.42764,
         help="Blend weight for the calibrated count-objective diversity branch; use 0 to restore the main baseline",
     )
+    parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed Sandy-window test adjustment")
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
     return parser.parse_args()
 
@@ -416,5 +425,6 @@ def main() -> None:
         calibration=args.calibration,
         calibration_strength=args.calibration_strength,
         count_blend_weight=args.count_blend_weight,
+        event_adjustment=not args.no_event_adjustment,
     )
     run_experiment(cfg)
