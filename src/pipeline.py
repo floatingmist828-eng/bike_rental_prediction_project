@@ -307,6 +307,7 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
     ]
     if has_count_branch:
         raw_count_grid = [
+            0.25000,
             0.40000,
             0.41500,
             0.42000,
