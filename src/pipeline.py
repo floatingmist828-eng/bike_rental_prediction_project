@@ -100,12 +100,29 @@ def blend_named_predictions(components: dict[str, np.ndarray], weights: dict[str
     return np.clip(pred, 0.0, None)
 
 
+def apply_calibration_strength(pred: np.ndarray, slope: float, intercept: float, strength: float) -> np.ndarray:
+    values = np.asarray(pred, dtype=float)
+    full_correction = slope * values + intercept
+    calibrated = values + float(strength) * (full_correction - values)
+    return np.clip(np.nan_to_num(calibrated, nan=0.0, posinf=0.0, neginf=0.0), 0.0, None)
+
+
 def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> list[dict[str, object]]:
     recipes: list[dict[str, object]] = [
         {
             "name": "main_calibrated",
             "weights": {"main_calibrated": 1.0},
             "description": "validation-calibrated main LightGBM ensemble",
+        },
+        {
+            "name": "main_calibrated_0p4",
+            "weights": {"main_calibrated_0p4": 1.0},
+            "description": "weaker main calibration previously observed as a competitive public-score variant",
+        },
+        {
+            "name": "main_calibrated_1p0",
+            "weights": {"main_calibrated_1p0": 1.0},
+            "description": "full affine main calibration variant",
         },
         {
             "name": "main_raw",
@@ -132,6 +149,17 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
                     "description": "public-score proxy with at least half calibrated main model",
                 },
                 {
+                    "name": "public_count_cap_0p25",
+                    "weights": {
+                        "main_raw": 0.44251,
+                        "main_calibrated_0p4": 0.16741,
+                        "main_calibrated": 0.04365,
+                        "main_calibrated_1p0": 0.09643,
+                        "count_calibrated": 0.25,
+                    },
+                    "description": "public-score proxy with count branch capped at 0.25",
+                },
+                {
                     "name": "calibrated_count_0p27776",
                     "weights": {"main_calibrated": 0.72224, "count_calibrated": 0.27776},
                     "description": "current best public submission blended with count diversity",
@@ -139,6 +167,30 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
             ]
         )
     return recipes
+
+
+def estimate_public_proxy_mse(test_components: dict[str, np.ndarray], weights: dict[str, float]) -> float | None:
+    known_public_scores = {
+        "main_raw": 3420.98579,
+        "main_calibrated_0p4": 3198.70370,
+        "main_calibrated": 3156.41472,
+        "main_calibrated_1p0": 3209.53910,
+        "count_calibrated": 3796.72191,
+    }
+    active_weights = {name: float(weight) for name, weight in weights.items() if abs(float(weight)) > 1e-12}
+    if any(name not in known_public_scores for name in active_weights):
+        return None
+    if any(name not in test_components for name in active_weights):
+        return None
+
+    names = list(active_weights)
+    linear = sum(active_weights[name] * known_public_scores[name] for name in names)
+    diversity = 0.0
+    for left in names:
+        for right in names:
+            diff = test_components[left] - test_components[right]
+            diversity += active_weights[left] * active_weights[right] * float(np.mean(diff * diff))
+    return linear - 0.5 * diversity
 
 
 def save_candidate_submissions(
@@ -177,6 +229,7 @@ def save_candidate_submissions(
                     "path": path.as_posix(),
                     "description": recipe["description"],
                     "weights": ";".join(f"{k}:{v:.5f}" for k, v in weights.items()),
+                    "public_proxy_mse": estimate_public_proxy_mse(test_components, weights),
                     "validation_mse": valid_metrics["mse"],
                     "validation_rmse": valid_metrics["rmse"],
                     "validation_mae": valid_metrics["mae"],
@@ -440,11 +493,35 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
 
     valid_components = {
         "main_raw": pred_valid_ensemble,
+        "main_calibrated_0p4": apply_calibration_strength(
+            pred_valid_ensemble,
+            calibrator.slope,
+            calibrator.intercept,
+            0.4,
+        ),
         "main_calibrated": pred_valid_calibrated,
+        "main_calibrated_1p0": apply_calibration_strength(
+            pred_valid_ensemble,
+            calibrator.slope,
+            calibrator.intercept,
+            1.0,
+        ),
     }
     test_components = {
         "main_raw": raw_main_pred_test,
+        "main_calibrated_0p4": apply_calibration_strength(
+            raw_main_pred_test,
+            calibrator.slope,
+            calibrator.intercept,
+            0.4,
+        ),
         "main_calibrated": main_calibrated_pred_test,
+        "main_calibrated_1p0": apply_calibration_strength(
+            raw_main_pred_test,
+            calibrator.slope,
+            calibrator.intercept,
+            1.0,
+        ),
     }
     if count_pred_test is not None and pred_valid_count_calibrated is not None:
         valid_components["count_calibrated"] = pred_valid_count_calibrated
