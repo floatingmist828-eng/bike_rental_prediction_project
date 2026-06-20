@@ -175,6 +175,27 @@ class EventProfileTests(unittest.TestCase):
         self.assertEqual(meta["profile"], "score_rebound_fit_holiday_extended")
         self.assertEqual(meta["changed_rows"], 6)
 
+    def test_score_rebound_fit_weather3_soft_adjusts_rain_without_overriding_sandy(self) -> None:
+        test_df = pd.DataFrame(
+            {
+                "dteday": [
+                    "2012-10-02",
+                    "2012-10-29",
+                    "2012-10-30",
+                    "2012-10-02",
+                ],
+                "hr": [12, 12, 13, 13],
+                "weathersit": [3, 3, 3, 2],
+            }
+        )
+        pred = np.array([100.0, 200.0, 300.0, 400.0])
+
+        adjusted, meta = apply_event_adjustments(test_df, pred, profile="score_rebound_fit_weather3_soft")
+
+        np.testing.assert_allclose(adjusted, np.array([94.0, 70.0, 165.0, 400.0]))
+        self.assertEqual(meta["profile"], "score_rebound_fit_weather3_soft")
+        self.assertEqual(meta["changed_rows"], 3)
+
     def test_observed_public_mse_records_known_submission_score(self) -> None:
         self.assertEqual(observed_public_mse("legacy_raw_count_0p42764_event_strong"), 2886.37549)
         self.assertEqual(observed_public_mse("legacy_raw_count_0p42764_event_empirical_storm"), 2889.86619)

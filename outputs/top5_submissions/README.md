@@ -4,8 +4,8 @@ These files are formatted for direct manual evaluation with columns `ID,cnt`.
 
 Suggested evaluation order:
 
-1. `02_current_trend_count_0p45_score_rebound_fit.csv` - current default `outputs/submission.csv`.
-2. `03_current_trend_count_0p45_holiday_soft.csv` - same model with light Thanksgiving/Christmas cuts.
-3. `04_current_trend_count_0p45_holiday_strong.csv` - stronger Thanksgiving/Christmas cuts.
-4. `05_current_trend_count_0p45_holiday_extended.csv` - extended adjacent holiday cuts.
-5. `01_known_best_strong_2886_37549.csv` - legacy known public-score baseline for comparison.
+1. `01_current_default_count_0p45_weather3_soft.csv` - current default `outputs/submission.csv`; conservative weather-adjusted blend.
+2. `02_validation_best_count_0p70_weather3_soft.csv` - lowest adjusted validation MSE candidate; higher public-score risk because it relies more on the count branch.
+3. `03_validation_best_count_0p70_weather3_holiday_soft.csv` - same aggressive blend plus light Thanksgiving/Christmas cuts.
+4. `04_validation_second_count_0p65_weather3_soft.csv` - slightly less aggressive validation-best family candidate.
+5. `05_known_best_strong_2886_37549.csv` - legacy known public-score baseline for comparison.

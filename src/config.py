@@ -26,7 +26,7 @@ class ExperimentConfig:
     calibration_strength: float = 0.6
     count_blend_weight: float = 0.45
     event_adjustment: bool = True
-    event_adjustment_profile: str = "score_rebound_fit"
+    event_adjustment_profile: str = "score_rebound_fit_weather3_soft"
 
 
 TARGET_COL = "cnt"

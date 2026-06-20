@@ -118,6 +118,42 @@ EVENT_PROFILES = {
         "2012-10-30_13_18": 0.55,
         "2012-10-30_19_23": 0.50,
     },
+    "score_rebound_fit_weather3_soft": {
+        "weather3": 0.94,
+        "2012-10-29": 0.35,
+        "2012-10-30_13_18": 0.55,
+        "2012-10-30_19_23": 0.50,
+    },
+    "score_rebound_fit_weather3_holiday_soft": {
+        "weather3": 0.94,
+        "2012-10-29": 0.35,
+        "2012-10-30_13_18": 0.55,
+        "2012-10-30_19_23": 0.50,
+        "2012-11-22": 0.75,
+        "2012-12-24": 0.80,
+        "2012-12-25": 0.70,
+    },
+    "score_rebound_fit_weather3_holiday_strong": {
+        "weather3": 0.94,
+        "2012-10-29": 0.35,
+        "2012-10-30_13_18": 0.55,
+        "2012-10-30_19_23": 0.50,
+        "2012-11-22": 0.65,
+        "2012-12-24": 0.70,
+        "2012-12-25": 0.60,
+    },
+    "score_rebound_fit_weather3_holiday_extended": {
+        "weather3": 0.94,
+        "2012-10-29": 0.35,
+        "2012-10-30_13_18": 0.55,
+        "2012-10-30_19_23": 0.50,
+        "2012-11-22": 0.65,
+        "2012-11-23": 0.85,
+        "2012-12-24": 0.70,
+        "2012-12-25": 0.60,
+        "2012-12-26": 0.80,
+        "2012-12-31": 0.85,
+    },
     "score_rebound_fit_holiday_soft": {
         "2012-10-29": 0.35,
         "2012-10-30_13_18": 0.55,
@@ -228,12 +264,20 @@ def _event_window_mask(dates: pd.Series, hours: np.ndarray, window_key: str) -> 
     return mask
 
 
+def _adjustment_mask(test_df: pd.DataFrame, dates: pd.Series, hours: np.ndarray, window_key: str) -> np.ndarray:
+    if window_key == "weather3":
+        if "weathersit" not in test_df.columns:
+            raise ValueError("weather3 adjustment requires weathersit column.")
+        return (test_df["weathersit"].to_numpy() >= 3)
+    return _event_window_mask(dates, hours, window_key)
+
+
 def apply_event_adjustments(
     test_df: pd.DataFrame,
     pred: np.ndarray,
     profile: str = "default",
 ) -> tuple[np.ndarray, dict[str, object]]:
-    """Adjust a small, documented weather-disruption window in the fixed test horizon."""
+    """Adjust documented weather-disruption windows in the fixed test horizon."""
     if profile not in EVENT_PROFILES:
         raise ValueError(f"Unknown event adjustment profile: {profile}")
 
@@ -244,7 +288,7 @@ def apply_event_adjustments(
 
     factors = np.ones(len(test_df), dtype=float)
     for window_key, factor in factors_config.items():
-        factors[_event_window_mask(dates, hours, window_key)] = factor
+        factors[_adjustment_mask(test_df, dates, hours, window_key)] = factor
 
     changed = factors != 1.0
     adjusted[changed] *= factors[changed]
@@ -410,6 +454,7 @@ def estimate_public_proxy_mse(test_components: dict[str, np.ndarray], weights: d
 def save_candidate_submissions(
     output_dir: Path,
     test_df: pd.DataFrame,
+    valid_df: pd.DataFrame,
     test_components: dict[str, np.ndarray],
     valid_components: dict[str, np.ndarray],
     y_valid: np.ndarray,
@@ -425,16 +470,26 @@ def save_candidate_submissions(
         weights = dict(recipe["weights"])
         pred_valid = blend_named_predictions(valid_components, weights)
         pred_test = blend_named_predictions(test_components, weights)
-        valid_metrics = regression_metrics(y_valid, pred_valid)
 
-        variants = [(name, pred_test, False, {"enabled": False, "changed_rows": 0, "mean_delta": 0.0})]
+        variants = [
+            (
+                name,
+                pred_test,
+                pred_valid,
+                False,
+                {"enabled": False, "changed_rows": 0, "mean_delta": 0.0},
+                {"enabled": False, "changed_rows": 0, "mean_delta": 0.0},
+            )
+        ]
         if event_enabled:
             for profile in EVENT_PROFILES:
                 event_pred, event_meta = apply_event_adjustments(test_df, pred_test, profile=profile)
+                event_valid_pred, event_valid_meta = apply_event_adjustments(valid_df, pred_valid, profile=profile)
                 suffix = "event" if profile == "default" else f"event_{profile}"
-                variants.append((f"{name}_{suffix}", event_pred, True, event_meta))
+                variants.append((f"{name}_{suffix}", event_pred, event_valid_pred, True, event_meta, event_valid_meta))
 
-        for variant_name, variant_pred, uses_event, event_meta in variants:
+        for variant_name, variant_pred, variant_valid_pred, uses_event, event_meta, event_valid_meta in variants:
+            valid_metrics = regression_metrics(y_valid, variant_valid_pred)
             submission = build_submission(test_df, variant_pred)
             validate_submission(submission, test_df)
             path = candidate_dir / f"submission_{variant_name}.csv"
@@ -453,6 +508,7 @@ def save_candidate_submissions(
                     "event_adjustment": uses_event,
                     "event_profile": event_meta.get("profile", "none"),
                     "event_changed_rows": int(event_meta.get("changed_rows", 0)),
+                    "validation_adjusted_rows": int(event_valid_meta.get("changed_rows", 0)),
                     "mean": float(submission[TARGET_COL].mean()),
                     "std": float(submission[TARGET_COL].std()),
                     "min": float(submission[TARGET_COL].min()),
@@ -747,6 +803,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     candidate_rows = save_candidate_submissions(
         cfg.output_dir,
         test_df,
+        valid_part,
         test_components,
         valid_components,
         y_valid,
@@ -834,12 +891,12 @@ def parse_args() -> argparse.Namespace:
         default=0.45,
         help="Blend weight for the calibrated count-objective diversity branch; use 0 to restore the main baseline",
     )
-    parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed Sandy-window test adjustment")
+    parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed test-horizon adjustments")
     parser.add_argument(
         "--event-adjustment-profile",
         choices=list(EVENT_PROFILES),
-        default="score_rebound_fit",
-        help="Sandy-window adjustment strength used for the main submission.csv",
+        default="score_rebound_fit_weather3_soft",
+        help="Weather/event adjustment profile used for the main submission.csv",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
     return parser.parse_args()
