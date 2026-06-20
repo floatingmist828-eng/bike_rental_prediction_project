@@ -26,7 +26,7 @@ class ExperimentConfig:
     calibration_strength: float = 0.6
     count_blend_weight: float = 0.42764
     event_adjustment: bool = True
-    event_adjustment_profile: str = "score_rebound_mid"
+    event_adjustment_profile: str = "score_rebound_fit"
 
 
 TARGET_COL = "cnt"

@@ -78,14 +78,54 @@ EVENT_PROFILES = {
         "2012-10-30_13_18": 0.40,
         "2012-10-30_19_23": 0.50,
     },
+    "score_rebound_0p25": {
+        "2012-10-29": 0.2625,
+        "2012-10-30_13_18": 0.375,
+        "2012-10-30_19_23": 0.50,
+    },
+    "score_rebound_0p50": {
+        "2012-10-29": 0.275,
+        "2012-10-30_13_18": 0.40,
+        "2012-10-30_19_23": 0.50,
+    },
+    "score_rebound_0p75": {
+        "2012-10-29": 0.2875,
+        "2012-10-30_13_18": 0.425,
+        "2012-10-30_19_23": 0.50,
+    },
     "score_rebound_mid": {
         "2012-10-29": 0.30,
         "2012-10-30_13_18": 0.45,
         "2012-10-30_19_23": 0.50,
     },
+    "score_rebound_1p25": {
+        "2012-10-29": 0.3125,
+        "2012-10-30_13_18": 0.475,
+        "2012-10-30_19_23": 0.50,
+    },
+    "score_rebound_1p50": {
+        "2012-10-29": 0.325,
+        "2012-10-30_13_18": 0.50,
+        "2012-10-30_19_23": 0.50,
+    },
+    "score_rebound_1p75": {
+        "2012-10-29": 0.3375,
+        "2012-10-30_13_18": 0.525,
+        "2012-10-30_19_23": 0.50,
+    },
     "score_rebound_fit": {
         "2012-10-29": 0.35,
         "2012-10-30_13_18": 0.55,
+        "2012-10-30_19_23": 0.50,
+    },
+    "score_rebound_2p25": {
+        "2012-10-29": 0.3625,
+        "2012-10-30_13_18": 0.575,
+        "2012-10-30_19_23": 0.50,
+    },
+    "score_rebound_2p50": {
+        "2012-10-29": 0.375,
+        "2012-10-30_13_18": 0.60,
         "2012-10-30_19_23": 0.50,
     },
     "stronger": {
@@ -782,7 +822,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--event-adjustment-profile",
         choices=list(EVENT_PROFILES),
-        default="score_rebound_mid",
+        default="score_rebound_fit",
         help="Sandy-window adjustment strength used for the main submission.csv",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
