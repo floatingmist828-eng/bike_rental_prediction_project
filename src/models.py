@@ -18,6 +18,7 @@ class ModelSpec:
     name: str
     estimator: object
     target_transform: TargetTransform = "raw"
+    sample_weight_fit_param: str = "sample_weight"
 
 
 @dataclass(frozen=True)
@@ -42,6 +43,65 @@ class PredictionCalibrator:
 
 def _has_module(module_name: str) -> bool:
     return importlib.util.find_spec(module_name) is not None
+
+
+TREND_CATEGORICAL_COLUMNS = (
+    "season",
+    "yr",
+    "mnth",
+    "hr",
+    "holiday",
+    "weekday",
+    "workingday",
+    "weathersit",
+    "day",
+    "weekofyear",
+    "quarter",
+    "hr_workingday",
+    "hr_weekday",
+    "month_hr",
+    "season_hr",
+    "bad_weather",
+    "hot",
+    "cold",
+    "humid",
+    "rush_hour",
+    "night",
+    "midday",
+)
+
+
+def _trend_numeric_columns(X: pd.DataFrame) -> list[str]:
+    return [c for c in X.columns if c not in TREND_CATEGORICAL_COLUMNS]
+
+
+def _make_trend_preprocessor():
+    from sklearn.compose import ColumnTransformer
+    from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+    try:
+        encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=True)
+    except TypeError:
+        encoder = OneHotEncoder(handle_unknown="ignore", sparse=True)
+
+    return ColumnTransformer(
+        [
+            ("cat", encoder, list(TREND_CATEGORICAL_COLUMNS)),
+            ("num", StandardScaler(with_mean=False), _trend_numeric_columns),
+        ],
+        remainder="drop",
+    )
+
+
+def _make_trend_pipeline(estimator):
+    from sklearn.pipeline import Pipeline
+
+    return Pipeline(
+        [
+            ("pre", _make_trend_preprocessor()),
+            ("reg", estimator),
+        ]
+    )
 
 
 def make_model_specs(model_set: str, seed: int, n_jobs: int) -> list[ModelSpec]:
@@ -215,6 +275,32 @@ def make_model_specs(model_set: str, seed: int, n_jobs: int) -> list[ModelSpec]:
                     ),
                 ]
             )
+
+    if model_set == "default":
+        from sklearn.linear_model import PoissonRegressor, Ridge, TweedieRegressor
+
+        specs.extend(
+            [
+                ModelSpec(
+                    "ridge_log_trend_a1",
+                    _make_trend_pipeline(Ridge(alpha=1.0, random_state=seed + 701)),
+                    "log1p",
+                    "reg__sample_weight",
+                ),
+                ModelSpec(
+                    "poisson_trend_a1",
+                    _make_trend_pipeline(PoissonRegressor(alpha=1.0, max_iter=3000)),
+                    "raw",
+                    "reg__sample_weight",
+                ),
+                ModelSpec(
+                    "tweedie_trend_a0p1",
+                    _make_trend_pipeline(TweedieRegressor(power=1.3, alpha=0.1, max_iter=3000, link="log")),
+                    "raw",
+                    "reg__sample_weight",
+                ),
+            ]
+        )
 
     if model_set == "sklearn" or not specs:
         from sklearn.ensemble import ExtraTreesRegressor, HistGradientBoostingRegressor
@@ -472,7 +558,10 @@ def make_count_model_specs(seed: int, n_jobs: int) -> list[ModelSpec]:
 def fit_model(spec: ModelSpec, X: pd.DataFrame, y: np.ndarray, sample_weight: np.ndarray | None = None) -> object:
     y_fit = np.log1p(y) if spec.target_transform == "log1p" else y
     try:
-        spec.estimator.fit(X, y_fit, sample_weight=sample_weight)
+        if sample_weight is None:
+            spec.estimator.fit(X, y_fit)
+        else:
+            spec.estimator.fit(X, y_fit, **{spec.sample_weight_fit_param: sample_weight})
     except TypeError:
         spec.estimator.fit(X, y_fit)
     return spec.estimator

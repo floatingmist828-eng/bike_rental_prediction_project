@@ -179,8 +179,8 @@ EVENT_PROFILES = {
 
 
 KNOWN_PUBLIC_CANDIDATE_SCORES = {
-    "raw_count_0p42764_event_strong": 2886.37549,
-    "raw_count_0p42764_event_empirical_storm": 2889.86619,
+    "legacy_raw_count_0p42764_event_strong": 2886.37549,
+    "legacy_raw_count_0p42764_event_empirical_storm": 2889.86619,
 }
 
 
@@ -319,13 +319,20 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
             0.44000,
             0.44500,
             0.45000,
+            0.47500,
+            0.50000,
+            0.52500,
+            0.55000,
+            0.60000,
+            0.65000,
+            0.70000,
         ]
         recipes.extend(
             [
                 {
                     "name": f"raw_count_{default_count_weight:.5f}".replace(".", "p"),
                     "weights": {"main_raw": 1.0 - default_count_weight, "count_calibrated": default_count_weight},
-                    "description": "public-score free optimum proxy: raw main plus count branch",
+                    "description": "default validation-guided raw main plus count branch",
                 },
                 {
                     "name": "raw_count_0p35000",
@@ -335,7 +342,7 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
                 {
                     "name": "public_constrained",
                     "weights": {"main_raw": 0.20354, "main_calibrated": 0.50, "count_calibrated": 0.29646},
-                    "description": "public-score proxy with at least half calibrated main model",
+                    "description": "legacy conservative blend with at least half calibrated main model",
                 },
                 {
                     "name": "public_count_cap_0p25",
@@ -346,7 +353,7 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
                         "main_calibrated_1p0": 0.09643,
                         "count_calibrated": 0.25,
                     },
-                    "description": "public-score proxy with count branch capped at 0.25",
+                    "description": "legacy conservative blend with count branch capped at 0.25",
                 },
                 {
                     "name": "calibrated_count_0p27776",
@@ -356,11 +363,11 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
             ]
         )
         recipes.extend(
-            {
-                "name": f"raw_count_{weight:.5f}".replace(".", "p"),
-                "weights": {"main_raw": 1.0 - weight, "count_calibrated": weight},
-                "description": "nearby raw/count proxy grid candidate for manual public-score probing",
-            }
+                {
+                    "name": f"raw_count_{weight:.5f}".replace(".", "p"),
+                    "weights": {"main_raw": 1.0 - weight, "count_calibrated": weight},
+                    "description": "raw/count validation grid candidate for manual public-score probing",
+                }
             for weight in raw_count_grid
             if abs(weight - default_count_weight) > 1e-6
         )
@@ -368,27 +375,8 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
 
 
 def estimate_public_proxy_mse(test_components: dict[str, np.ndarray], weights: dict[str, float]) -> float | None:
-    known_public_scores = {
-        "main_raw": 3420.98579,
-        "main_calibrated_0p4": 3198.70370,
-        "main_calibrated": 3156.41472,
-        "main_calibrated_1p0": 3209.53910,
-        "count_calibrated": 3796.72191,
-    }
-    active_weights = {name: float(weight) for name, weight in weights.items() if abs(float(weight)) > 1e-12}
-    if any(name not in known_public_scores for name in active_weights):
-        return None
-    if any(name not in test_components for name in active_weights):
-        return None
-
-    names = list(active_weights)
-    linear = sum(active_weights[name] * known_public_scores[name] for name in names)
-    diversity = 0.0
-    for left in names:
-        for right in names:
-            diff = test_components[left] - test_components[right]
-            diversity += active_weights[left] * active_weights[right] * float(np.mean(diff * diff))
-    return linear - 0.5 * diversity
+    _ = test_components, weights
+    return None
 
 
 def save_candidate_submissions(
@@ -815,7 +803,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--count-blend-weight",
         type=float,
-        default=0.42764,
+        default=0.45,
         help="Blend weight for the calibrated count-objective diversity branch; use 0 to restore the main baseline",
     )
     parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed Sandy-window test adjustment")

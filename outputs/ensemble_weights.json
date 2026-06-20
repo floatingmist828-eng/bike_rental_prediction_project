@@ -1,6 +1,9 @@
 {
-  "lgbm_log_horizon_a": 0.5633847399985785,
-  "lgbm_log_horizon_b": 0.4366152597981315,
-  "xgb_raw_horizon": 0.0,
-  "xgb_log": 2.0329008195561045e-10
+  "lgbm_log_horizon_a": 0.5572452868356936,
+  "lgbm_log_horizon_b": 0.3062700221478053,
+  "xgb_raw_horizon": 1.2410017210197135e-10,
+  "xgb_log": 0.0,
+  "ridge_log_trend_a1": 0.05997711994362161,
+  "poisson_trend_a1": 0.005347318322477384,
+  "tweedie_trend_a0p1": 0.0711602526263019
 }

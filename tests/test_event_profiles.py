@@ -110,8 +110,9 @@ class EventProfileTests(unittest.TestCase):
         self.assertEqual(meta["changed_rows"], 3)
 
     def test_observed_public_mse_records_known_submission_score(self) -> None:
-        self.assertEqual(observed_public_mse("raw_count_0p42764_event_strong"), 2886.37549)
-        self.assertEqual(observed_public_mse("raw_count_0p42764_event_empirical_storm"), 2889.86619)
+        self.assertEqual(observed_public_mse("legacy_raw_count_0p42764_event_strong"), 2886.37549)
+        self.assertEqual(observed_public_mse("legacy_raw_count_0p42764_event_empirical_storm"), 2889.86619)
+        self.assertIsNone(observed_public_mse("raw_count_0p42764_event_strong"))
         self.assertIsNone(observed_public_mse("raw_count_0p42764_event_empirical_shutdown"))
 
 
