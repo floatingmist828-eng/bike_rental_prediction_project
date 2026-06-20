@@ -32,24 +32,52 @@ from .utils import (
 )
 
 
-def apply_event_adjustments(test_df: pd.DataFrame, pred: np.ndarray) -> tuple[np.ndarray, dict[str, object]]:
+EVENT_PROFILES = {
+    "mild": {
+        "2012-10-29": 0.65,
+        "2012-10-30_13_18": 0.75,
+        "2012-10-30_19_23": 0.85,
+    },
+    "default": {
+        "2012-10-29": 0.45,
+        "2012-10-30_13_18": 0.55,
+        "2012-10-30_19_23": 0.65,
+    },
+    "strong": {
+        "2012-10-29": 0.25,
+        "2012-10-30_13_18": 0.35,
+        "2012-10-30_19_23": 0.50,
+    },
+}
+
+
+def apply_event_adjustments(
+    test_df: pd.DataFrame,
+    pred: np.ndarray,
+    profile: str = "default",
+) -> tuple[np.ndarray, dict[str, object]]:
     """Adjust a small, documented weather-disruption window in the fixed test horizon."""
+    if profile not in EVENT_PROFILES:
+        raise ValueError(f"Unknown event adjustment profile: {profile}")
+
     adjusted = np.asarray(pred, dtype=float).copy()
     dates = pd.to_datetime(test_df["dteday"])
     hours = test_df["hr"].to_numpy()
+    factors_config = EVENT_PROFILES[profile]
 
     factors = np.ones(len(test_df), dtype=float)
-    factors[dates.eq(pd.Timestamp("2012-10-29")).to_numpy()] = 0.45
+    factors[dates.eq(pd.Timestamp("2012-10-29")).to_numpy()] = factors_config["2012-10-29"]
 
     sandy_1030 = dates.eq(pd.Timestamp("2012-10-30")).to_numpy()
-    factors[sandy_1030 & ((13 <= hours) & (hours <= 18))] = 0.55
-    factors[sandy_1030 & ((19 <= hours) & (hours <= 23))] = 0.65
+    factors[sandy_1030 & ((13 <= hours) & (hours <= 18))] = factors_config["2012-10-30_13_18"]
+    factors[sandy_1030 & ((19 <= hours) & (hours <= 23))] = factors_config["2012-10-30_19_23"]
 
     changed = factors != 1.0
     adjusted[changed] *= factors[changed]
     return np.clip(adjusted, 0.0, None), {
         "enabled": True,
         "method": "hurricane_sandy_window",
+        "profile": profile,
         "changed_rows": int(changed.sum()),
         "mean_delta": float(adjusted.mean() - np.asarray(pred, dtype=float).mean()),
     }
@@ -215,8 +243,10 @@ def save_candidate_submissions(
 
         variants = [(name, pred_test, False, {"enabled": False, "changed_rows": 0, "mean_delta": 0.0})]
         if event_enabled:
-            event_pred, event_meta = apply_event_adjustments(test_df, pred_test)
-            variants.append((f"{name}_event", event_pred, True, event_meta))
+            for profile in ["mild", "default", "strong"]:
+                event_pred, event_meta = apply_event_adjustments(test_df, pred_test, profile=profile)
+                suffix = "event" if profile == "default" else f"event_{profile}"
+                variants.append((f"{name}_{suffix}", event_pred, True, event_meta))
 
         for variant_name, variant_pred, uses_event, event_meta in variants:
             submission = build_submission(test_df, variant_pred)
@@ -234,6 +264,7 @@ def save_candidate_submissions(
                     "validation_rmse": valid_metrics["rmse"],
                     "validation_mae": valid_metrics["mae"],
                     "event_adjustment": uses_event,
+                    "event_profile": event_meta.get("profile", "none"),
                     "event_changed_rows": int(event_meta.get("changed_rows", 0)),
                     "mean": float(submission[TARGET_COL].mean()),
                     "std": float(submission[TARGET_COL].std()),
@@ -537,11 +568,16 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
     )
 
     if cfg.event_adjustment:
-        pred_test, event_adjustment = apply_event_adjustments(test_df, pred_test)
+        pred_test, event_adjustment = apply_event_adjustments(
+            test_df,
+            pred_test,
+            profile=cfg.event_adjustment_profile,
+        )
     else:
         event_adjustment = {
             "enabled": False,
             "method": "none",
+            "profile": "none",
             "changed_rows": 0,
             "mean_delta": 0.0,
         }
@@ -612,6 +648,12 @@ def parse_args() -> argparse.Namespace:
         help="Blend weight for the calibrated count-objective diversity branch; use 0 to restore the main baseline",
     )
     parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed Sandy-window test adjustment")
+    parser.add_argument(
+        "--event-adjustment-profile",
+        choices=["mild", "default", "strong"],
+        default="default",
+        help="Sandy-window adjustment strength used for the main submission.csv",
+    )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
     return parser.parse_args()
 
@@ -633,5 +675,6 @@ def main() -> None:
         calibration_strength=args.calibration_strength,
         count_blend_weight=args.count_blend_weight,
         event_adjustment=not args.no_event_adjustment,
+        event_adjustment_profile=args.event_adjustment_profile,
     )
     run_experiment(cfg)
