@@ -11,6 +11,10 @@ class CandidateRecipeTests(unittest.TestCase):
         names = [str(recipe["name"]) for recipe in recipes]
 
         self.assertIn("raw_count_0p25000", names)
+        self.assertIn("raw_count_0p45250", names)
+        self.assertIn("raw_count_0p45500", names)
+        self.assertIn("raw_count_0p45750", names)
+        self.assertIn("raw_count_0p46000", names)
         self.assertIn("raw_count_0p55000", names)
         self.assertIn("raw_count_0p75000", names)
         self.assertIn("raw_count_0p80000", names)

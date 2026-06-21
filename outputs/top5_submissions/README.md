@@ -2,12 +2,16 @@
 
 These files are formatted for direct manual evaluation with columns `ID,cnt`.
 
-This set is risk-constrained after the late-hour validation candidates regressed badly online. It avoids broad hour-level post-processing and prioritizes known public evidence plus small storm/count perturbations.
+Current public best baseline:
+
+- `01_public_best_2843_count_0p45_weather3_soft.csv` matches `outputs/submission.csv`; observed public MSE `2843.40079`.
+
+The remaining candidates are deliberately small perturbations around that baseline. They avoid broad hour-level, late-year, holiday, and high count extrapolation adjustments because those regressed badly online.
 
 Suggested evaluation order:
 
-1. `01_rollback_default_count_0p45_weather3_soft.csv` - current rollback default `outputs/submission.csv`; conservative weather-adjusted blend.
-2. `02_known_best_strong_2886_37549.csv` - known observed public score: `2886.37549`.
-3. `03_score_rebound_light.csv` - storm-only small rebound above the known strong profile.
-4. `04_score_rebound_fit.csv` - storm-only larger rebound estimated from previous public-score gap.
-5. `05_small_count_0p475_weather3_soft.csv` - smallest validation-guided count increase that stays close to the rollback default; validation MSE `2833.113059`.
+1. `01_public_best_2843_count_0p45_weather3_soft.csv` - current default and known public best, MSE `2843.40079`.
+2. `02_micro_count_0p4525_weather3_0p935.csv` - tiny count increase plus a slightly stronger weather3 cut; validation MSE `2841.023342`.
+3. `03_micro_count_0p455_weather3_0p935.csv` - slightly larger count increase with the same weather3 micro-cut; validation MSE `2840.124689`.
+4. `04_micro_count_0p4525_weather3_soft.csv` - tiny count increase with the original weather3 factor; validation MSE `2841.029289`.
+5. `05_micro_count_0p46_weather3_0p935.csv` - upper end of the conservative micro-search window; validation MSE `2838.339149`.
