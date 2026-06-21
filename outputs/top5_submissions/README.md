@@ -4,10 +4,8 @@ These files are formatted for direct manual evaluation with columns `ID,cnt`.
 
 Suggested evaluation order:
 
-1. `01_current_default_count_1p075_late_hour.csv` - current default `outputs/submission.csv`; validation MSE `2683.346736`.
-2. `02_validation_second_count_1p05_late_hour.csv` - nearly tied late-hour candidate; validation MSE `2683.348008`.
-3. `03_validation_third_count_1p025_late_hour.csv` - slightly less aggressive count extrapolation; validation MSE `2683.741068`.
-4. `04_validation_fourth_count_1p00_late_hour.csv` - no count extrapolation beyond the calibrated count branch; validation MSE `2684.525916`.
-5. `05_validation_fifth_count_0p90_late_hour.csv` - lower count weight fallback; validation MSE `2691.583188`.
-
-The late-hour profile is the most aggressive validation-driven candidate family. If public/private score regresses, compare against `outputs/candidates/*overcount_hum_rush.csv` and earlier conservative candidates.
+1. `01_current_default_count_0p45_weather3_soft.csv` - current default `outputs/submission.csv`; conservative weather-adjusted blend.
+2. `02_validation_best_count_1p025_weather3_soft.csv` - lowest adjusted validation MSE candidate in the current grid; highest public-score risk because it slightly extrapolates past the calibrated count branch.
+3. `03_validation_best_count_1p025_weather3_holiday_soft.csv` - same over-count candidate plus light Thanksgiving/Christmas cuts.
+4. `04_validation_second_count_1p00_weather3_soft.csv` - count-only style candidate without extrapolation.
+5. `05_known_best_strong_2886_37549.csv` - legacy known public-score baseline for comparison.

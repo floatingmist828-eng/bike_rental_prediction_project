@@ -154,50 +154,6 @@ EVENT_PROFILES = {
         "2012-12-26": 0.80,
         "2012-12-31": 0.85,
     },
-    "score_rebound_fit_weather3_overcount": {
-        "weather3": 0.9125,
-        "2012-10-29": 0.35,
-        "2012-10-30_13_18": 0.55,
-        "2012-10-30_19_23": 0.50,
-    },
-    "score_rebound_fit_weather3_overcount_holiday_soft": {
-        "weather3": 0.9125,
-        "2012-10-29": 0.35,
-        "2012-10-30_13_18": 0.55,
-        "2012-10-30_19_23": 0.50,
-        "2012-11-22": 0.75,
-        "2012-12-24": 0.80,
-        "2012-12-25": 0.70,
-    },
-    "score_rebound_fit_weather3_overcount_hum_rush": {
-        "high_hum": 1.05,
-        "workingday_morning": 1.015,
-        "workingday_evening": 0.99,
-        "weather3": 0.9125,
-        "2012-10-29": 0.35,
-        "2012-10-30_13_18": 0.55,
-        "2012-10-30_19_23": 0.50,
-    },
-    "score_rebound_fit_weather3_overcount_late_hour": {
-        "month_ge_8": 1.06,
-        "high_hum": 1.075,
-        "workingday_morning": 1.0125,
-        "workingday_evening": 0.9875,
-        "weather3": 0.9125,
-        "mul_hr_17": 0.9858,
-        "mul_hr_14": 1.0221,
-        "mul_hr_13": 1.0204,
-        "mul_hr_23": 1.0583,
-        "mul_hr_20": 1.0202,
-        "mul_hr_9": 1.0162,
-        "mul_hr_19": 1.0084,
-        "mul_hr_2": 0.9236,
-        "mul_hr_1": 0.9439,
-        "mul_hr_16": 0.9923,
-        "2012-10-29": 0.35,
-        "2012-10-30_13_18": 0.55,
-        "2012-10-30_19_23": 0.50,
-    },
     "score_rebound_fit_holiday_soft": {
         "2012-10-29": 0.35,
         "2012-10-30_13_18": 0.55,
@@ -313,26 +269,6 @@ def _adjustment_mask(test_df: pd.DataFrame, dates: pd.Series, hours: np.ndarray,
         if "weathersit" not in test_df.columns:
             raise ValueError("weather3 adjustment requires weathersit column.")
         return (test_df["weathersit"].to_numpy() >= 3)
-    if window_key == "high_hum":
-        if "hum" not in test_df.columns:
-            raise ValueError("high_hum adjustment requires hum column.")
-        return test_df["hum"].to_numpy() >= 0.85
-    if window_key == "workingday_morning":
-        if "workingday" not in test_df.columns:
-            raise ValueError("workingday_morning adjustment requires workingday column.")
-        return (test_df["workingday"].to_numpy() == 1) & np.isin(hours, [7, 8, 9])
-    if window_key == "workingday_evening":
-        if "workingday" not in test_df.columns:
-            raise ValueError("workingday_evening adjustment requires workingday column.")
-        return (test_df["workingday"].to_numpy() == 1) & np.isin(hours, [16, 17, 18, 19])
-    if window_key.startswith("month_ge_"):
-        if "mnth" not in test_df.columns:
-            raise ValueError("month_ge adjustment requires mnth column.")
-        threshold = int(window_key.removeprefix("month_ge_"))
-        return test_df["mnth"].to_numpy() >= threshold
-    if window_key.startswith("hr_"):
-        target_hour = int(window_key.removeprefix("hr_"))
-        return hours == target_hour
     return _event_window_mask(dates, hours, window_key)
 
 
@@ -352,13 +288,7 @@ def apply_event_adjustments(
 
     factors = np.ones(len(test_df), dtype=float)
     for window_key, factor in factors_config.items():
-        operation = "multiply" if window_key.startswith("mul_") else "set"
-        mask_key = window_key.removeprefix("mul_") if operation == "multiply" else window_key
-        mask = _adjustment_mask(test_df, dates, hours, mask_key)
-        if operation == "multiply":
-            factors[mask] *= factor
-        else:
-            factors[mask] = factor
+        factors[_adjustment_mask(test_df, dates, hours, window_key)] = factor
 
     changed = factors != 1.0
     adjusted[changed] *= factors[changed]
@@ -473,8 +403,6 @@ def candidate_recipes(has_count_branch: bool, default_count_weight: float) -> li
             0.90000,
             1.00000,
             1.02500,
-            1.05000,
-            1.07500,
         ]
         recipes.extend(
             [
@@ -690,7 +618,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict[str, object]:
         f"RMSE={calibrated_metrics['rmse']:.6f} | MAE={calibrated_metrics['mae']:.6f}"
     )
 
-    count_blend_weight = max(0.0, float(cfg.count_blend_weight))
+    count_blend_weight = float(np.clip(cfg.count_blend_weight, 0.0, 1.0))
     count_weights: dict[str, float] = {}
     count_calibrator = None
     count_metrics = None
@@ -965,17 +893,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--count-blend-weight",
         type=float,
-        default=ExperimentConfig.count_blend_weight,
-        help=(
-            "Weight for the calibrated count-objective diversity branch; values above 1 extrapolate "
-            "toward the count branch. Use 0 to restore the main baseline."
-        ),
+        default=0.45,
+        help="Blend weight for the calibrated count-objective diversity branch; use 0 to restore the main baseline",
     )
     parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed test-horizon adjustments")
     parser.add_argument(
         "--event-adjustment-profile",
         choices=list(EVENT_PROFILES),
-        default=ExperimentConfig.event_adjustment_profile,
+        default="score_rebound_fit_weather3_soft",
         help="Weather/event adjustment profile used for the main submission.csv",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")
