@@ -242,6 +242,7 @@ EVENT_PROFILES = {
 
 
 KNOWN_PUBLIC_CANDIDATE_SCORES = {
+    "raw_count_0p44000_event_score_rebound_fit_weather3_soft": 2841.38813,
     "raw_count_0p45000_event_score_rebound_fit_weather3_soft": 2843.40079,
     "legacy_raw_count_0p42764_event_strong": 2886.37549,
     "legacy_raw_count_0p42764_event_empirical_storm": 2889.86619,
@@ -894,7 +895,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--count-blend-weight",
         type=float,
-        default=0.45,
+        default=0.44,
         help="Blend weight for the calibrated count-objective diversity branch; use 0 to restore the main baseline",
     )
     parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed test-horizon adjustments")

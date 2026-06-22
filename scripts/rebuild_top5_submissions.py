@@ -12,19 +12,19 @@ TOP5_DIR = OUTPUT_DIR / "top5_submissions"
 
 CANDIDATES = [
     (
-        "01_current_public_best_2843_40079.csv",
+        "01_current_public_best_2841_38813.csv",
         OUTPUT_DIR / "submission.csv",
-        "current rollback default; observed public MSE 2843.40079",
+        "current default 0.440/weather3_soft submission; observed public MSE 2841.38813",
     ),
     (
-        "02_lower_count_0p445_weather3_soft.csv",
+        "02_previous_public_best_2843_40079.csv",
+        CANDIDATE_DIR / "submission_raw_count_0p45000_event_score_rebound_fit_weather3_soft.csv",
+        "previous default 0.450/weather3_soft submission; observed public MSE 2843.40079",
+    ),
+    (
+        "03_nearby_count_0p445_weather3_soft.csv",
         CANDIDATE_DIR / "submission_raw_count_0p44500_event_score_rebound_fit_weather3_soft.csv",
-        "nearest lower count-weight probe; validation MSE 2843.738708",
-    ),
-    (
-        "03_lower_count_0p440_weather3_soft.csv",
-        CANDIDATE_DIR / "submission_raw_count_0p44000_event_score_rebound_fit_weather3_soft.csv",
-        "slightly stronger guard against high-count public overfit; validation MSE 2845.564620",
+        "nearest middle probe between the two public-scored defaults; validation MSE 2843.738708",
     ),
     (
         "04_calibrated_count_0p27776_weather3_soft.csv",
@@ -50,9 +50,9 @@ def main() -> None:
         "",
         "These files are formatted for direct manual evaluation with columns `ID,cnt`.",
         "",
-        "This set is intentionally risk-constrained after prior local-validation winners regressed online. "
-        "The first file remains the observed public best; the rest are narrow probes around that baseline, "
-        "focused on reducing high-count overfit rather than chasing lower local validation MSE.",
+        "This set is anchored on the current observed public best. The first file matches the default "
+        "`outputs/submission.csv`; the remaining files are backups or narrow probes around the same "
+        "weather-adjusted count-blend family.",
         "",
         "Suggested evaluation order:",
         "",

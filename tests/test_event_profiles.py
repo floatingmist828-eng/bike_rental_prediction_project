@@ -197,6 +197,7 @@ class EventProfileTests(unittest.TestCase):
         self.assertEqual(meta["changed_rows"], 3)
 
     def test_observed_public_mse_records_known_submission_score(self) -> None:
+        self.assertEqual(observed_public_mse("raw_count_0p44000_event_score_rebound_fit_weather3_soft"), 2841.38813)
         self.assertEqual(observed_public_mse("raw_count_0p45000_event_score_rebound_fit_weather3_soft"), 2843.40079)
         self.assertEqual(observed_public_mse("legacy_raw_count_0p42764_event_strong"), 2886.37549)
         self.assertEqual(observed_public_mse("legacy_raw_count_0p42764_event_empirical_storm"), 2889.86619)
