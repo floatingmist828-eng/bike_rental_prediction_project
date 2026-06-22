@@ -242,6 +242,7 @@ EVENT_PROFILES = {
 
 
 KNOWN_PUBLIC_CANDIDATE_SCORES = {
+    "raw_count_0p45000_event_score_rebound_fit_weather3_soft": 2843.40079,
     "legacy_raw_count_0p42764_event_strong": 2886.37549,
     "legacy_raw_count_0p42764_event_empirical_storm": 2889.86619,
 }

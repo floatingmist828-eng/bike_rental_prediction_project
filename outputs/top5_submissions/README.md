@@ -2,12 +2,12 @@
 
 These files are formatted for direct manual evaluation with columns `ID,cnt`.
 
-This set is risk-constrained after the late-hour validation candidates regressed badly online. It avoids broad hour-level post-processing and prioritizes known public evidence plus small storm/count perturbations.
+This set is intentionally risk-constrained after prior local-validation winners regressed online. The first file remains the observed public best; the rest are narrow probes around that baseline, focused on reducing high-count overfit rather than chasing lower local validation MSE.
 
 Suggested evaluation order:
 
-1. `01_rollback_default_count_0p45_weather3_soft.csv` - current rollback default `outputs/submission.csv`; conservative weather-adjusted blend.
-2. `02_known_best_strong_2886_37549.csv` - known observed public score: `2886.37549`.
-3. `03_score_rebound_light.csv` - storm-only small rebound above the known strong profile.
-4. `04_score_rebound_fit.csv` - storm-only larger rebound estimated from previous public-score gap.
-5. `05_small_count_0p475_weather3_soft.csv` - smallest validation-guided count increase that stays close to the rollback default; validation MSE `2833.113059`.
+1. `01_current_public_best_2843_40079.csv` - current rollback default; observed public MSE 2843.40079.
+2. `02_lower_count_0p445_weather3_soft.csv` - nearest lower count-weight probe; validation MSE 2843.738708.
+3. `03_lower_count_0p440_weather3_soft.csv` - slightly stronger guard against high-count public overfit; validation MSE 2845.564620.
+4. `04_calibrated_count_0p27776_weather3_soft.csv` - lower-count calibrated blend; validation MSE 2894.974348.
+5. `05_public_constrained_weather3_soft.csv` - conservative blend with at least half calibrated main model; validation MSE 2890.986889.
