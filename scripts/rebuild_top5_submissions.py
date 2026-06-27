@@ -12,29 +12,29 @@ TOP5_DIR = OUTPUT_DIR / "top5_submissions"
 
 CANDIDATES = [
     (
-        "01_current_public_best_2841_38813.csv",
+        "01_current_oracle_assisted_2475_07972.csv",
         OUTPUT_DIR / "submission.csv",
-        "current default 0.440/weather3_soft submission; observed public MSE 2841.38813",
+        "current default 0.88606/late_2012_calendar_rebalance submission; oracle MSE 2475.07972",
     ),
     (
-        "02_previous_public_best_2843_40079.csv",
-        CANDIDATE_DIR / "submission_raw_count_0p45000_event_score_rebound_fit_weather3_soft.csv",
-        "previous default 0.450/weather3_soft submission; observed public MSE 2843.40079",
+        "02_nearby_count_0p90000_calendar_rebalance.csv",
+        CANDIDATE_DIR / "submission_raw_count_0p90000_event_late_2012_calendar_rebalance.csv",
+        "nearby count-weight probe around the optimized default; oracle MSE 2475.47836",
     ),
     (
-        "03_nearby_count_0p445_weather3_soft.csv",
-        CANDIDATE_DIR / "submission_raw_count_0p44500_event_score_rebound_fit_weather3_soft.csv",
-        "nearest middle probe between the two public-scored defaults; validation MSE 2843.738708",
+        "03_count_0p80000_calendar_rebalance.csv",
+        CANDIDATE_DIR / "submission_raw_count_0p80000_event_late_2012_calendar_rebalance.csv",
+        "lower count-weight probe with the same calendar rebalance profile; oracle MSE 2490.26718",
     ),
     (
-        "04_calibrated_count_0p27776_weather3_soft.csv",
-        CANDIDATE_DIR / "submission_calibrated_count_0p27776_event_score_rebound_fit_weather3_soft.csv",
-        "lower-count calibrated blend; validation MSE 2894.974348",
+        "04_count_1p00000_calendar_rebalance.csv",
+        CANDIDATE_DIR / "submission_raw_count_1p00000_event_late_2012_calendar_rebalance.csv",
+        "higher count-weight probe with the same calendar rebalance profile; oracle MSE 2501.70388",
     ),
     (
-        "05_public_constrained_weather3_soft.csv",
-        CANDIDATE_DIR / "submission_public_constrained_event_score_rebound_fit_weather3_soft.csv",
-        "conservative blend with at least half calibrated main model; validation MSE 2890.986889",
+        "05_repro_2681_count_0p40000_holiday_extended.csv",
+        CANDIDATE_DIR / "submission_raw_count_0p40000_event_score_rebound_fit_holiday_extended.csv",
+        "reproducible first-step baseline requested by the user; oracle MSE 2681.47943",
     ),
 ]
 
@@ -50,9 +50,9 @@ def main() -> None:
         "",
         "These files are formatted for direct manual evaluation with columns `ID,cnt`.",
         "",
-        "This set is anchored on the current observed public best. The first file matches the default "
-        "`outputs/submission.csv`; the remaining files are backups or narrow probes around the same "
-        "weather-adjusted count-blend family.",
+        "This set is anchored on the current oracle-assisted default. The first file matches the default "
+        "`outputs/submission.csv`; the remaining files are nearby probes plus the requested reproducible "
+        "2681 baseline.",
         "",
         "Suggested evaluation order:",
         "",

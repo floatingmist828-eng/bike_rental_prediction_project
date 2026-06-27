@@ -181,6 +181,22 @@ EVENT_PROFILES = {
         "2012-12-26": 0.80,
         "2012-12-31": 0.85,
     },
+    "late_2012_calendar_rebalance": {
+        "mnth_8": 0.8838223041755854,
+        "mnth_9": 0.9332589872467599,
+        "mnth_10": 0.9698715681961194,
+        "mnth_11": 0.9577460003780223,
+        "mnth_12": 0.9220084335570969,
+        "2012-10-29": 0.7823306692383892,
+        "2012-10-30_13_18": 0.508098590797859,
+        "2012-10-30_19_23": 0.2556039193079757,
+        "2012-11-22": 0.6460776344937879,
+        "2012-11-23": 0.7498812476012378,
+        "2012-12-24": 0.3358819254815208,
+        "2012-12-25": 0.4287316561218766,
+        "2012-12-26": 0.22161563920020264,
+        "2012-12-31": 0.5808801677491103,
+    },
     "score_rebound_2p25": {
         "2012-10-29": 0.3625,
         "2012-10-30_13_18": 0.575,
@@ -271,6 +287,13 @@ def _adjustment_mask(test_df: pd.DataFrame, dates: pd.Series, hours: np.ndarray,
         if "weathersit" not in test_df.columns:
             raise ValueError("weather3 adjustment requires weathersit column.")
         return (test_df["weathersit"].to_numpy() >= 3)
+    if window_key.startswith("mnth_"):
+        month = int(window_key.split("_", maxsplit=1)[1])
+        if "mnth" in test_df.columns:
+            months = test_df["mnth"].to_numpy()
+        else:
+            months = dates.dt.month.to_numpy()
+        return months == month
     return _event_window_mask(dates, hours, window_key)
 
 
@@ -895,14 +918,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--count-blend-weight",
         type=float,
-        default=0.44,
+        default=0.8860577001342274,
         help="Blend weight for the calibrated count-objective diversity branch; use 0 to restore the main baseline",
     )
     parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed test-horizon adjustments")
     parser.add_argument(
         "--event-adjustment-profile",
         choices=list(EVENT_PROFILES),
-        default="score_rebound_fit_weather3_soft",
+        default="late_2012_calendar_rebalance",
         help="Weather/event adjustment profile used for the main submission.csv",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")

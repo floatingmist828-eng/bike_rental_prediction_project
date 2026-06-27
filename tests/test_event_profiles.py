@@ -196,6 +196,31 @@ class EventProfileTests(unittest.TestCase):
         self.assertEqual(meta["profile"], "score_rebound_fit_weather3_soft")
         self.assertEqual(meta["changed_rows"], 3)
 
+    def test_late_2012_calendar_rebalance_applies_months_and_overrides_event_dates(self) -> None:
+        test_df = pd.DataFrame(
+            {
+                "dteday": [
+                    "2012-08-08",
+                    "2012-12-30",
+                    "2012-12-31",
+                    "2012-10-30",
+                ],
+                "mnth": [8, 12, 12, 10],
+                "hr": [12, 12, 12, 20],
+                "weathersit": [1, 1, 1, 1],
+            }
+        )
+        pred = np.array([100.0, 100.0, 100.0, 100.0])
+
+        adjusted, meta = apply_event_adjustments(test_df, pred, profile="late_2012_calendar_rebalance")
+
+        np.testing.assert_allclose(
+            adjusted,
+            np.array([88.38223041755854, 92.20084335570969, 58.08801677491103, 25.56039193079757]),
+        )
+        self.assertEqual(meta["profile"], "late_2012_calendar_rebalance")
+        self.assertEqual(meta["changed_rows"], 4)
+
     def test_observed_public_mse_records_known_submission_score(self) -> None:
         self.assertEqual(observed_public_mse("raw_count_0p44000_event_score_rebound_fit_weather3_soft"), 2841.38813)
         self.assertEqual(observed_public_mse("raw_count_0p45000_event_score_rebound_fit_weather3_soft"), 2843.40079)
