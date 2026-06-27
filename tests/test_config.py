@@ -9,7 +9,7 @@ from src.pipeline import parse_args
 
 
 class ConfigDefaultTests(unittest.TestCase):
-    def test_default_event_profile_uses_late_2012_calendar_rebalance(self) -> None:
+    def test_default_event_profile_uses_workday_bad_weather_hour_rebalance(self) -> None:
         cfg = ExperimentConfig(
             train_path=Path("data/train.csv"),
             test_path=Path("data/test.csv"),
@@ -17,9 +17,9 @@ class ConfigDefaultTests(unittest.TestCase):
             model_dir=Path("models"),
         )
 
-        self.assertEqual(cfg.event_adjustment_profile, "late_2012_calendar_rebalance")
+        self.assertEqual(cfg.event_adjustment_profile, "late_2012_workday_bad_weather_hour_rebalance")
 
-    def test_default_count_weight_uses_late_2012_calendar_rebalance(self) -> None:
+    def test_default_count_weight_uses_workday_bad_weather_hour_rebalance(self) -> None:
         cfg = ExperimentConfig(
             train_path=Path("data/train.csv"),
             test_path=Path("data/test.csv"),
@@ -27,19 +27,19 @@ class ConfigDefaultTests(unittest.TestCase):
             model_dir=Path("models"),
         )
 
-        self.assertAlmostEqual(cfg.count_blend_weight, 0.8860577001342274)
+        self.assertAlmostEqual(cfg.count_blend_weight, 0.85946)
 
-    def test_cli_default_count_weight_uses_late_2012_calendar_rebalance(self) -> None:
+    def test_cli_default_count_weight_uses_workday_bad_weather_hour_rebalance(self) -> None:
         with patch("sys.argv", ["run.py"]):
             args = parse_args()
 
-        self.assertAlmostEqual(args.count_blend_weight, 0.8860577001342274)
+        self.assertAlmostEqual(args.count_blend_weight, 0.85946)
 
-    def test_cli_default_event_profile_uses_late_2012_calendar_rebalance(self) -> None:
+    def test_cli_default_event_profile_uses_workday_bad_weather_hour_rebalance(self) -> None:
         with patch("sys.argv", ["run.py"]):
             args = parse_args()
 
-        self.assertEqual(args.event_adjustment_profile, "late_2012_calendar_rebalance")
+        self.assertEqual(args.event_adjustment_profile, "late_2012_workday_bad_weather_hour_rebalance")
 
     def test_cli_can_still_select_reproducible_2681_candidate(self) -> None:
         with patch(

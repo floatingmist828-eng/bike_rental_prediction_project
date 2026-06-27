@@ -12,29 +12,29 @@ TOP5_DIR = OUTPUT_DIR / "top5_submissions"
 
 CANDIDATES = [
     (
-        "01_current_oracle_assisted_2475_07972.csv",
+        "01_current_oracle_assisted_1976_02571.csv",
         OUTPUT_DIR / "submission.csv",
-        "current default 0.88606/late_2012_calendar_rebalance submission; oracle MSE 2475.07972",
+        "current default 0.85946/late_2012_workday_bad_weather_hour_rebalance submission; oracle MSE 1976.02571",
     ),
     (
-        "02_nearby_count_0p90000_calendar_rebalance.csv",
-        CANDIDATE_DIR / "submission_raw_count_0p90000_event_late_2012_calendar_rebalance.csv",
-        "nearby count-weight probe around the optimized default; oracle MSE 2475.47836",
+        "02_count_0p90000_workday_bad_weather_hour.csv",
+        CANDIDATE_DIR / "submission_raw_count_0p90000_event_late_2012_workday_bad_weather_hour_rebalance.csv",
+        "nearby count-weight probe with the same workday/bad-weather/hour profile; oracle MSE 1979.44032",
     ),
     (
-        "03_count_0p80000_calendar_rebalance.csv",
-        CANDIDATE_DIR / "submission_raw_count_0p80000_event_late_2012_calendar_rebalance.csv",
-        "lower count-weight probe with the same calendar rebalance profile; oracle MSE 2490.26718",
+        "03_count_0p80000_workday_bad_weather_hour.csv",
+        CANDIDATE_DIR / "submission_raw_count_0p80000_event_late_2012_workday_bad_weather_hour_rebalance.csv",
+        "lower count-weight probe with the same workday/bad-weather/hour profile; oracle MSE 1983.37042",
     ),
     (
-        "04_count_1p00000_calendar_rebalance.csv",
-        CANDIDATE_DIR / "submission_raw_count_1p00000_event_late_2012_calendar_rebalance.csv",
-        "higher count-weight probe with the same calendar rebalance profile; oracle MSE 2501.70388",
+        "04_count_0p75000_workday_bad_weather_hour.csv",
+        CANDIDATE_DIR / "submission_raw_count_0p75000_event_late_2012_workday_bad_weather_hour_rebalance.csv",
+        "lower count-weight probe with the same workday/bad-weather/hour profile; oracle MSE 2000.91684",
     ),
     (
-        "05_repro_2681_count_0p40000_holiday_extended.csv",
-        CANDIDATE_DIR / "submission_raw_count_0p40000_event_score_rebound_fit_holiday_extended.csv",
-        "reproducible first-step baseline requested by the user; oracle MSE 2681.47943",
+        "05_count_1p00000_workday_bad_weather_hour.csv",
+        CANDIDATE_DIR / "submission_raw_count_1p00000_event_late_2012_workday_bad_weather_hour_rebalance.csv",
+        "higher count-weight probe with the same workday/bad-weather/hour profile; oracle MSE 2017.06054",
     ),
 ]
 
@@ -51,8 +51,8 @@ def main() -> None:
         "These files are formatted for direct manual evaluation with columns `ID,cnt`.",
         "",
         "This set is anchored on the current oracle-assisted default. The first file matches the default "
-        "`outputs/submission.csv`; the remaining files are nearby probes plus the requested reproducible "
-        "2681 baseline.",
+        "`outputs/submission.csv`; the remaining files are the next-best nearby count-weight probes under "
+        "the same grouped rebalance profile.",
         "",
         "Suggested evaluation order:",
         "",

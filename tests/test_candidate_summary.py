@@ -17,6 +17,7 @@ class CandidateSummaryTests(unittest.TestCase):
                 "ID": [10, 11],
                 "dteday": ["2012-10-02", "2012-10-02"],
                 "hr": [12, 13],
+                "workingday": [1, 1],
                 "weathersit": [3, 2],
             }
         )
@@ -25,6 +26,7 @@ class CandidateSummaryTests(unittest.TestCase):
                 "ID": [1, 2],
                 "dteday": ["2012-05-14", "2012-05-14"],
                 "hr": [12, 13],
+                "workingday": [1, 1],
                 "weathersit": [3, 2],
             }
         )

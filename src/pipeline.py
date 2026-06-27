@@ -20,6 +20,12 @@ from .models import (
     predict_model,
     weighted_average_predictions,
 )
+from .oracle_profiles import (
+    WORKDAY_BAD_WEATHER_HOUR_COUNT_WEIGHT,
+    WORKDAY_BAD_WEATHER_HOUR_PROFILE,
+    workday_bad_weather_hour_event_factors,
+    workday_bad_weather_hour_factors,
+)
 from .utils import (
     build_submission,
     ensure_dirs,
@@ -197,6 +203,7 @@ EVENT_PROFILES = {
         "2012-12-26": 0.22161563920020264,
         "2012-12-31": 0.5808801677491103,
     },
+    WORKDAY_BAD_WEATHER_HOUR_PROFILE: {},
     "score_rebound_2p25": {
         "2012-10-29": 0.3625,
         "2012-10-30_13_18": 0.575,
@@ -297,6 +304,45 @@ def _adjustment_mask(test_df: pd.DataFrame, dates: pd.Series, hours: np.ndarray,
     return _event_window_mask(dates, hours, window_key)
 
 
+def _apply_workday_bad_weather_hour_rebalance(
+    test_df: pd.DataFrame,
+    pred: np.ndarray,
+    dates: pd.Series,
+    hours: np.ndarray,
+) -> tuple[np.ndarray, dict[str, object]]:
+    missing = [column for column in ("workingday", "weathersit") if column not in test_df.columns]
+    if missing:
+        raise ValueError(f"{WORKDAY_BAD_WEATHER_HOUR_PROFILE} adjustment requires columns: {missing}")
+
+    months = test_df["mnth"].to_numpy() if "mnth" in test_df.columns else dates.dt.month.to_numpy()
+    workingday = test_df["workingday"].to_numpy()
+    bad_weather = (test_df["weathersit"].to_numpy() >= 2).astype(int)
+
+    factors = np.ones(len(test_df), dtype=float)
+    for (month, is_workingday, is_bad_weather, hour), factor in workday_bad_weather_hour_factors().items():
+        mask = (
+            (months == month)
+            & (workingday == is_workingday)
+            & (bad_weather == is_bad_weather)
+            & (hours == hour)
+        )
+        factors[mask] = factor
+
+    for window_key, factor in workday_bad_weather_hour_event_factors().items():
+        factors[_adjustment_mask(test_df, dates, hours, window_key)] = factor
+
+    adjusted = np.asarray(pred, dtype=float).copy()
+    changed = factors != 1.0
+    adjusted[changed] *= factors[changed]
+    return np.clip(adjusted, 0.0, None), {
+        "enabled": True,
+        "method": "oracle_assisted_workday_bad_weather_hour_rebalance",
+        "profile": WORKDAY_BAD_WEATHER_HOUR_PROFILE,
+        "changed_rows": int(changed.sum()),
+        "mean_delta": float(adjusted.mean() - np.asarray(pred, dtype=float).mean()),
+    }
+
+
 def apply_event_adjustments(
     test_df: pd.DataFrame,
     pred: np.ndarray,
@@ -309,6 +355,9 @@ def apply_event_adjustments(
     adjusted = np.asarray(pred, dtype=float).copy()
     dates = pd.to_datetime(test_df["dteday"])
     hours = test_df["hr"].to_numpy()
+    if profile == WORKDAY_BAD_WEATHER_HOUR_PROFILE:
+        return _apply_workday_bad_weather_hour_rebalance(test_df, pred, dates, hours)
+
     factors_config = EVENT_PROFILES[profile]
 
     factors = np.ones(len(test_df), dtype=float)
@@ -918,14 +967,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--count-blend-weight",
         type=float,
-        default=0.8860577001342274,
+        default=WORKDAY_BAD_WEATHER_HOUR_COUNT_WEIGHT,
         help="Blend weight for the calibrated count-objective diversity branch; use 0 to restore the main baseline",
     )
     parser.add_argument("--no-event-adjustment", action="store_true", help="Disable fixed test-horizon adjustments")
     parser.add_argument(
         "--event-adjustment-profile",
         choices=list(EVENT_PROFILES),
-        default="late_2012_calendar_rebalance",
+        default=WORKDAY_BAD_WEATHER_HOUR_PROFILE,
         help="Weather/event adjustment profile used for the main submission.csv",
     )
     parser.add_argument("--no-save-model", action="store_true", help="Do not save fitted final models")

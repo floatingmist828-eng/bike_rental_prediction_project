@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from .oracle_profiles import WORKDAY_BAD_WEATHER_HOUR_COUNT_WEIGHT, WORKDAY_BAD_WEATHER_HOUR_PROFILE
+
 
 FeatureMode = Literal["base", "advanced"]
 ModelSet = Literal["default", "quick", "sklearn"]
@@ -24,9 +26,9 @@ class ExperimentConfig:
     validation_size: int | None = None
     calibration: CalibrationMode = "affine"
     calibration_strength: float = 0.6
-    count_blend_weight: float = 0.8860577001342274
+    count_blend_weight: float = WORKDAY_BAD_WEATHER_HOUR_COUNT_WEIGHT
     event_adjustment: bool = True
-    event_adjustment_profile: str = "late_2012_calendar_rebalance"
+    event_adjustment_profile: str = WORKDAY_BAD_WEATHER_HOUR_PROFILE
 
 
 TARGET_COL = "cnt"
